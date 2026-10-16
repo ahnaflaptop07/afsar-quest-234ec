@@ -1792,6 +1792,25 @@
       <!-- Button: BECOME A PATRON (Hover turns #8B0000) -->
       <button class="btn-support-creator" id="patron-btn">BECOME A PATRON</button>
 
+      <!-- Live Gateway Status Message -->
+      <div id="payment-status-box" style="display: none; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #D4AF37; text-transform: uppercase;">
+        <span id="payment-status-text">INITIALIZING ENCRYPTED DISPATCH...</span>
+        <div id="manual-redirect-wrap" style="display: none; margin-top: 8px;">
+          <a id="manual-redirect-link" href="#" target="_blank" style="color: #FFFFFF; background: #8B0000; padding: 6px 14px; border-radius: 2px; text-decoration: none; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; display: inline-block;">CLICK HERE TO OPEN PAYMENT GATEWAY ↗</a>
+        </div>
+      </div>
+
+      <!-- Quick Test & Preview Dossier Controls -->
+      <div class="payment-test-links" style="display: flex; gap: 20px; justify-content: center; align-items: center; margin-top: 20px; flex-wrap: wrap;">
+        <a href="success.html?transactionId=AQ-89104&paymentAmount=1000" id="test-success-link" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #D4AF37; text-decoration: none; border-bottom: 1px dashed rgba(212, 175, 55, 0.45); padding-bottom: 2px; text-transform: uppercase; transition: color 0.2s ease;">
+          ⚡ PREVIEW SUCCESS DOSSIER
+        </a>
+        <span style="color: #444444; font-size: 11px;">|</span>
+        <a href="cancel.html" id="test-cancel-link" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #FF5A5A; text-decoration: none; border-bottom: 1px dashed rgba(255, 90, 90, 0.45); padding-bottom: 2px; text-transform: uppercase; transition: color 0.2s ease;">
+          ⚠️ PREVIEW CANCEL INTERCEPTION
+        </a>
+      </div>
+
       <div class="donation-assurance">
         🔒 256-BIT ENCRYPTED CHANNEL • CANCEL ANYTIME • INDEPENDENCE GUARANTEED
       </div>
@@ -2243,7 +2262,37 @@
     const customAmountWrap = document.getElementById('custom-amount-wrap');
     const customAmountInput = document.getElementById('custom-amount-input');
     const patronBtn = document.getElementById('patron-btn');
+    const paymentStatusBox = document.getElementById('payment-status-box');
+    const paymentStatusText = document.getElementById('payment-status-text');
+    const manualRedirectWrap = document.getElementById('manual-redirect-wrap');
+    const manualRedirectLink = document.getElementById('manual-redirect-link');
+    const testSuccessLink = document.getElementById('test-success-link');
     let selectedAmount = '1000';
+
+    // Helper: update test success URL with selected amount
+    function syncTestLinks(amount) {
+      if (testSuccessLink) {
+        const randTrx = 'AQ-' + Math.floor(100000 + Math.random() * 900000);
+        testSuccessLink.href = `success.html?transactionId=${randTrx}&paymentAmount=${amount}`;
+      }
+    }
+
+    // Helper: reset button and feedback to idle state
+    function resetPatronBtn() {
+      if (patronBtn) {
+        patronBtn.textContent = 'BECOME A PATRON';
+        patronBtn.disabled = false;
+        patronBtn.style.opacity = '1';
+        patronBtn.style.cursor = 'pointer';
+      }
+      if (paymentStatusBox) paymentStatusBox.style.display = 'none';
+      if (manualRedirectWrap) manualRedirectWrap.style.display = 'none';
+    }
+
+    // BFCache / History Navigation listener: prevents getting frozen in PROCESSING... state
+    window.addEventListener('pageshow', () => {
+      resetPatronBtn();
+    });
 
     // Tier selection & Custom amount toggle
     tierButtons.forEach(btn => {
@@ -2253,12 +2302,26 @@
         selectedAmount = btn.getAttribute('data-amount');
         if (selectedAmount === 'custom') {
           if (customAmountWrap) customAmountWrap.style.display = 'flex';
-          if (customAmountInput) customAmountInput.focus();
+          if (customAmountInput) {
+            customAmountInput.focus();
+            syncTestLinks(customAmountInput.value || 2500);
+          }
         } else {
           if (customAmountWrap) customAmountWrap.style.display = 'none';
+          syncTestLinks(selectedAmount);
         }
       });
     });
+
+    if (customAmountInput) {
+      customAmountInput.addEventListener('input', () => {
+        const val = customAmountInput.value.trim();
+        syncTestLinks(val || 1000);
+      });
+    }
+
+    // Initial sync of preview links
+    syncTestLinks(selectedAmount);
 
     // "BECOME A PATRON" Click Handler: Deshi Pay Checkout
     if (patronBtn) {
@@ -2277,12 +2340,22 @@
           donationAmount = Number(selectedAmount) || 1000;
         }
 
-        // 2. Change button text to "PROCESSING..." and disable it
-        const originalText = patronBtn.textContent;
-        patronBtn.textContent = 'PROCESSING...';
+        syncTestLinks(donationAmount);
+
+        // 2. Change button text to "CONNECTING..." and display live status
+        patronBtn.textContent = 'CONNECTING GATEWAY...';
         patronBtn.disabled = true;
         patronBtn.style.opacity = '0.7';
         patronBtn.style.cursor = 'not-allowed';
+
+        if (paymentStatusBox && paymentStatusText) {
+          paymentStatusBox.style.display = 'block';
+          paymentStatusText.textContent = 'ENCRYPTING DISPATCH & CONTACTING DESHI PAY...';
+        }
+
+        // Use AbortController to guarantee timeout recovery (10s max)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
           // 3. Make POST request using Fetch API
@@ -2294,6 +2367,7 @@
 
           const response = await fetch(endpoint, {
             method: 'POST',
+            signal: controller.signal,
             headers: {
               'Content-Type': 'application/json',
               'API-KEY': DESHIPAY_API_KEY
@@ -2307,25 +2381,40 @@
             })
           });
 
+          clearTimeout(timeoutId);
           const data = await response.json();
 
           // 4. Response Handling
           if ((data.status === true || data.status === 1) && data.payment_url) {
+            if (paymentStatusText) {
+              paymentStatusText.textContent = 'GATEWAY SECURED. REDIRECTING TO PAYMENT...';
+            }
+            if (manualRedirectWrap && manualRedirectLink) {
+              manualRedirectWrap.style.display = 'block';
+              manualRedirectLink.href = data.payment_url;
+            }
+
+            // Immediately redirect
             window.location.href = data.payment_url;
+
+            // Fallback: If browser prevents automatic navigation, allow manual click after 2s
+            setTimeout(() => {
+              patronBtn.textContent = 'REDIRECTING...';
+            }, 2000);
           } else {
             alert(data && data.message ? data.message : 'Payment initiation failed. Please try again.');
-            patronBtn.textContent = originalText;
-            patronBtn.disabled = false;
-            patronBtn.style.opacity = '1';
-            patronBtn.style.cursor = 'pointer';
+            resetPatronBtn();
           }
         } catch (err) {
+          clearTimeout(timeoutId);
           console.error('Payment Error:', err);
-          alert('Unable to connect to Deshi Pay payment gateway. Please check your connection and try again.');
-          patronBtn.textContent = originalText;
-          patronBtn.disabled = false;
-          patronBtn.style.opacity = '1';
-          patronBtn.style.cursor = 'pointer';
+
+          if (err.name === 'AbortError') {
+            alert('Gateway connection timed out. Please check your network or try again.');
+          } else {
+            alert('Unable to connect to Deshi Pay payment gateway. Please check your connection and try again.');
+          }
+          resetPatronBtn();
         }
       });
     }

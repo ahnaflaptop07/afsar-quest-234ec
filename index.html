@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFSAR'S QUEST | Investigative Geopolitics & Documentary Journalism</title>
+  
+  <!-- Google Fonts: Anton & Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lenis & GSAP CDN -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* -------------------------------------------------------------
+       GLOBAL RESETS & DESIGN SYSTEM RULES
+       Background: #0C0C0C | Text: #F0F0F0 | Accent: #D4AF37
+       Hover: Deep Crimson Red #8B0000
+       ------------------------------------------------------------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: #0C0C0C;
+      color: #F0F0F0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: clip; /* Required: NOT overflow-x: hidden to preserve sticky position */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background-color: #8B0000;
+      color: #FFFFFF;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #8B0000;
+    }
+
+    img, video, canvas {
+      display: block;
+      max-width: 100%;
+    }
+
+    /* Fixed 3px metallic gold right-edge scroll progress bar */
+    #global-progress-bar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 3px;
+      height: 0vh;
+      background: #D4AF37;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.7);
+      z-index: 1000;
+      pointer-events: none;
+      transition: height 0.05s linear;
+    }
+
+    /* -------------------------------------------------------------
+       BUG FIX 1: NAVBAR INSIDE VIEWFINDER (top: 40px, left: 50px, right: 50px, z-index: 999)
+       ------------------------------------------------------------- */
+    .site-nav {
+      position: fixed;
+      top: 40px;
+      left: 50px;
+      right: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .nav-brand {
+      pointer-events: auto;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(12, 12, 12, 0.65);
+      padding: 10px 18px;
+      border: 1px solid rgba(235, 235, 235, 0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-brand:hover {
+      color: #8B0000;
+      border-color: #8B0000;
+    }
+
+    .nav-brand-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #8B0000;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #8B0000;
+      animation: recordPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.25; transform: scale(0.8); }
+    }
+
+    .nav-donate-btn {
+      pointer-events: auto;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      border: 1px solid #D4AF37;
+      background: rgba(12, 12, 12, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 2px;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    /* Hover effect: turns deep crimson red (#8B0000) */
+    .nav-donate-btn:hover {
+      background: #8B0000;
+      border-color: #8B0000;
+      color: #FFFFFF;
+      box-shadow: 0 0 20px rgba(139, 0, 0, 0.65);
+      transform: translateY(-2px);
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 1: HERO SCROLL SEQUENCE (CANVAS)
+       ------------------------------------------------------------- */
+    #hero-section {
+      position: relative;
+      width: 100%;
+      height: 520vh; /* Pinned scroll canvas track */
+      background-color: #0C0C0C;
+    }
+
+    .hero-sticky-frame {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    /* Fallback video */
+    #fallback-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Film Vignette & Documentary Shadow Overlay */
+    .hero-cinematic-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: radial-gradient(circle at center, rgba(12, 12, 12, 0.15) 30%, rgba(12, 12, 12, 0.8) 100%),
+                  linear-gradient(to bottom, rgba(12, 12, 12, 0.7) 0%, transparent 22%, transparent 78%, rgba(12, 12, 12, 0.85) 100%);
+    }
+
+    /* Camera Viewfinder Reticle & HUD */
+    .hero-hud {
+      position: absolute;
+      inset: 24px 32px;
+      pointer-events: none;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(240, 240, 240, 0.45);
+    }
+
+    .hud-bottom-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Viewfinder Corner Framing Brackets */
+    .hud-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: rgba(212, 175, 55, 0.35);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .hud-tl { top: 20px; left: 24px; border-width: 2px 0 0 2px; }
+    .hud-tr { top: 20px; right: 24px; border-width: 2px 2px 0 0; }
+    .hud-bl { bottom: 20px; left: 24px; border-width: 0 0 2px 2px; }
+    .hud-br { bottom: 20px; right: 24px; border-width: 0 2px 2px 0; }
+
+    /* Center Crosshair */
+    .hud-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      pointer-events: none;
+    }
+
+    .hud-crosshair::before, .hud-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(212, 175, 55, 0.4);
+    }
+
+    .hud-crosshair::before {
+      top: 50%;
+      left: -12px;
+      width: 72px;
+      height: 1px;
+      transform: translateY(-50%);
+    }
+
+    .hud-crosshair::after {
+      left: 50%;
+      top: -12px;
+      width: 1px;
+      height: 72px;
+      transform: translateX(-50%);
+    }
+
+    /* Frame Loader Status */
+    #hero-loader {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      background: rgba(12, 12, 12, 0.85);
+      padding: 8px 20px;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 2px;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+
+    /* Hero Text Overlays Layer */
+    .hero-text-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    /* 0.05-0.15: AFSAR'S QUEST (110px Anton, centered) */
+    .overlay-text-1 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(56px, 10vw, 110px);
+      line-height: 0.92;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-align: center;
+      opacity: 0;
+      text-shadow: 0 12px 45px rgba(0, 0, 0, 0.95);
+      will-change: opacity, transform;
+      width: 90%;
+    }
+
+    /* 0.20-0.30: Unmasking the narrative. (26px Inter, centered) */
+    .overlay-text-2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      font-size: 26px;
+      color: #F0F0F0;
+      text-align: center;
+      letter-spacing: 1px;
+      opacity: 0;
+      text-shadow: 0 6px 28px rgba(0, 0, 0, 0.95);
+      will-change: opacity, transform;
+      width: 80%;
+      max-width: 720px;
+    }
+
+    /* 0.40-0.50: From propaganda to reality. (60px Anton, centered) */
+    .overlay-text-3 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(34px, 5.5vw, 60px);
+      color: #F0F0F0;
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 3px;
+      opacity: 0;
+      text-shadow: 0 10px 35px rgba(0, 0, 0, 0.95);
+      will-change: opacity, transform;
+      width: 90%;
+    }
+
+    /* 0.60-0.70: The truth is independent. (60px Anton, centered) */
+    .overlay-text-4 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(34px, 5.5vw, 60px);
+      color: #F0F0F0;
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 3px;
+      opacity: 0;
+      text-shadow: 0 10px 35px rgba(0, 0, 0, 0.95);
+      will-change: opacity, transform;
+      width: 90%;
+    }
+
+    /* 0.80-0.90: Decoding Geopolitics & Politics. (14px Inter uppercase, top 10% left 8%) */
+    .overlay-text-5 {
+      position: absolute;
+      top: 10%;
+      left: 8%;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #F0F0F0;
+      opacity: 0;
+      will-change: opacity, transform;
+      background: rgba(12, 12, 12, 0.75);
+      padding: 12px 20px;
+      border-left: 3px solid #D4AF37;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Hero Scroll hint */
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(240, 240, 240, 0.45);
+      z-index: 7;
+      pointer-events: none;
+      animation: floatHint 2.4s infinite ease-in-out;
+    }
+
+    .hero-scroll-line {
+      width: 1px;
+      height: 24px;
+      background: linear-gradient(to bottom, #D4AF37, transparent);
+    }
+
+    @keyframes floatHint {
+      0%, 100% { transform: translate(-50%, 0); opacity: 0.7; }
+      50% { transform: translate(-50%, 6px); opacity: 0.25; }
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
+       Left 50%: position: sticky; top: 0; height: 100vh; overflow: hidden;
+       Right 50%: Four 100vh text panels. Swap images via IntersectionObserver.
+       ------------------------------------------------------------- */
+    #mission-section {
+      position: relative;
+      width: 100%;
+      background-color: #0C0C0C;
+      display: flex;
+      align-items: flex-start;
+      border-top: 1px solid rgba(240, 240, 240, 0.08);
+      border-bottom: 1px solid rgba(240, 240, 240, 0.08);
+    }
+
+    /* Left 50% Sticky Container */
+    .mission-left {
+      width: 50%;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      left: 0;
+      overflow: hidden; /* BUG FIX: exact sticky specification */
+      background: #090909;
+      border-right: 1px solid rgba(240, 240, 240, 0.08);
+      flex-shrink: 0;
+    }
+
+    .mission-image-stack {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mission-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .mission-img.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .mission-img-tint {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 35%, rgba(12, 12, 12, 0.6) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .mission-img-badge {
+      position: absolute;
+      bottom: 36px;
+      left: 36px;
+      z-index: 3;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      background: rgba(12, 12, 12, 0.85);
+      padding: 8px 16px;
+      border-left: 2px solid #D4AF37;
+      text-transform: uppercase;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Right 50% Scrolling Panels */
+    .mission-right {
+      width: 50%;
+      position: relative;
+    }
+
+    .mission-panel {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 10% 0 14%;
+      position: relative;
+    }
+
+    .mission-panel-index {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mission-panel-index::after {
+      content: '';
+      width: 44px;
+      height: 1px;
+      background: rgba(212, 175, 55, 0.4);
+    }
+
+    .mission-panel-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(42px, 5.5vw, 70px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 24px;
+      color: #F0F0F0;
+    }
+
+    .mission-panel-quote {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(18px, 1.8vw, 24px);
+      font-weight: 300;
+      line-height: 1.5;
+      color: #D4AF37;
+      max-width: 540px;
+      margin-bottom: 26px;
+    }
+
+    .mission-panel-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.75;
+      color: #999999;
+      max-width: 500px;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 3: HORIZONTAL ACTION RAIL (BUG FIX: HORIZONTAL SCROLL)
+       4-panel horizontal rail. Pin main section and translate track.
+       ------------------------------------------------------------- */
+    #action-rail-section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #090909;
+    }
+
+    .rail-header {
+      position: absolute;
+      top: 36px;
+      left: 50px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .rail-header-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .rail-header-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: 32px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+    }
+
+    .rail-track {
+      display: flex;
+      flex-wrap: nowrap;
+      height: 100%;
+      width: 400vw; /* 4 panels each 100vw */
+      will-change: transform;
+    }
+
+    .rail-panel {
+      width: 100vw;
+      height: 100vh;
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 80px;
+    }
+
+    .rail-card {
+      display: flex;
+      width: 90%;
+      max-width: 1240px;
+      height: 72vh;
+      background: #121212;
+      border: 1px solid rgba(240, 240, 240, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+
+    .rail-card-media {
+      width: 58%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rail-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .rail-card:hover .rail-card-media img {
+      transform: scale(1.05);
+    }
+
+    .rail-media-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 65%, #121212 100%);
+    }
+
+    .rail-card-content {
+      width: 42%;
+      height: 100%;
+      padding: 56px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .rail-card-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rail-card-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(34px, 3.6vw, 52px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      line-height: 1.05;
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .rail-card-caption {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.7;
+      color: #C0C0C0;
+    }
+
+    .rail-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(240, 240, 240, 0.1);
+      padding-top: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #777777;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 4: PARALLAX STATEMENT
+       Slow parallax (yPercent: 20) with Anton bold statement
+       ------------------------------------------------------------- */
+    #parallax-statement {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: #080808;
+    }
+
+    .parallax-bg-wrapper {
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 100%;
+      height: 140%;
+      z-index: 1;
+      will-change: transform;
+    }
+
+    .parallax-bg-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.35) contrast(1.15) grayscale(25%);
+    }
+
+    .parallax-vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at center, rgba(12, 12, 12, 0.35) 0%, rgba(12, 12, 12, 0.88) 85%);
+      pointer-events: none;
+    }
+
+    .parallax-content {
+      position: relative;
+      z-index: 3;
+      max-width: 1120px;
+      padding: 0 32px;
+    }
+
+    .parallax-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 8px 20px;
+      background: rgba(12, 12, 12, 0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    .parallax-heading {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(48px, 7.2vw, 100px);
+      line-height: 0.98;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      text-shadow: 0 15px 50px rgba(0, 0, 0, 0.85);
+      margin-bottom: 28px;
+    }
+
+    .parallax-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(14px, 1.4vw, 18px);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(240, 240, 240, 0.65);
+      font-weight: 500;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 5: REVERSE COLUMNS (BUG FIX: PARALLAX LOGIC)
+       col-up (left & right) moves yPercent: -20, col-down (center) moves yPercent: +20
+       ------------------------------------------------------------- */
+    #reverse-columns {
+      position: relative;
+      width: 100%;
+      min-height: 140vh;
+      padding: 140px 48px;
+      background: #0C0C0C;
+      overflow: hidden;
+    }
+
+    .reverse-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .reverse-header-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .reverse-header-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(38px, 5vw, 68px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+    }
+
+    .reverse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 36px;
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    .rev-column {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      will-change: transform;
+    }
+
+    /* col-down starting offset so it travels downward smoothly */
+    .col-down {
+      margin-top: -40px;
+    }
+
+    .rev-card {
+      background: #141414;
+      border: 1px solid rgba(240, 240, 240, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.4s ease, transform 0.4s ease;
+    }
+
+    .rev-card:hover {
+      border-color: #8B0000;
+      transform: translateY(-4px);
+    }
+
+    .rev-card-img-wrapper {
+      width: 100%;
+      height: 360px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .rev-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .rev-card:hover .rev-card-img {
+      transform: scale(1.05);
+    }
+
+    .rev-card-meta {
+      padding: 24px;
+    }
+
+    .rev-card-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .rev-card-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: 22px;
+      letter-spacing: 1.5px;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .rev-card-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #8c8c8c;
+    }
+
+    /* Center Highlight Metric Card */
+    .rev-quote-card {
+      background: #111111;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 44px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .rev-quote-stat {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: 60px;
+      color: #D4AF37;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .rev-quote-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .rev-quote-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: #999999;
+      line-height: 1.6;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 6: SUPPORT / DONATION SECTION (BUG FIX: 3D TOKEN IMG)
+       Includes img tag and GSAP float (yoyo: true, repeat: -1, y: 15, duration: 2)
+       ------------------------------------------------------------- */
+    #donation-section {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 35%, #1c150b 0%, #0C0C0C 75%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 32px;
+      text-align: center;
+      border-top: 1px solid rgba(240, 240, 240, 0.08);
+      overflow: hidden;
+    }
+
+    .donation-ambient-glow {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.16) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* BUG FIX: Token container with img tag */
+    .token-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+      z-index: 2;
+    }
+
+    .token-3d-img {
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.45));
+      will-change: transform;
+      cursor: pointer;
+    }
+
+    .donation-content {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+    }
+
+    .donation-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .donation-heading {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(48px, 6.5vw, 84px);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .donation-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(15px, 1.6vw, 18px);
+      font-weight: 300;
+      color: #B5B5B5;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .donation-tiers {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+
+    .tier-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(22, 22, 22, 0.85);
+      border: 1px solid rgba(240, 240, 240, 0.15);
+      color: #F0F0F0;
+      padding: 12px 24px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tier-btn:hover {
+      background: #8B0000;
+      border-color: #8B0000;
+      color: #FFFFFF;
+      transform: translateY(-2px);
+    }
+
+    .tier-btn.active {
+      background: #D4AF37;
+      color: #0C0C0C;
+      border-color: #D4AF37;
+      box-shadow: 0 0 16px rgba(212, 175, 55, 0.4);
+    }
+
+    /* Button: BECOME A PATRON (Hover turns #8B0000) */
+    .btn-support-creator {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      background: transparent;
+      border: 1.5px solid #D4AF37;
+      padding: 18px 46px;
+      border-radius: 2px;
+      cursor: pointer;
+      display: inline-block;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+    }
+
+    .btn-support-creator:hover {
+      background-color: #8B0000;
+      border-color: #8B0000;
+      color: #FFFFFF;
+      box-shadow: 0 0 30px rgba(139, 0, 0, 0.65);
+      transform: translateY(-2px);
+    }
+
+    .donation-assurance {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #666666;
+      text-transform: uppercase;
+      margin-top: 24px;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 7: NEWSLETTER SECTION
+       ------------------------------------------------------------- */
+    #newsletter-section {
+      position: relative;
+      width: 100%;
+      padding: 140px 32px;
+      background: #080808;
+      border-top: 1px solid rgba(240, 240, 240, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .newsletter-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(35, 20, 10, 0.3) 0%, rgba(8, 8, 8, 0.95) 80%);
+      pointer-events: none;
+    }
+
+    .newsletter-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .newsletter-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .newsletter-heading {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(38px, 5vw, 68px);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      margin-bottom: 18px;
+    }
+
+    .newsletter-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: #999999;
+      line-height: 1.6;
+      margin-bottom: 38px;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 10px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .newsletter-input {
+      flex: 1;
+      background: #141414;
+      border: 1px solid rgba(240, 240, 240, 0.15);
+      padding: 16px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #F0F0F0;
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .newsletter-input:focus {
+      border-color: #D4AF37;
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+
+    .newsletter-input::placeholder {
+      color: #555555;
+    }
+
+    .newsletter-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: #D4AF37;
+      color: #0C0C0C;
+      border: none;
+      padding: 16px 30px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .newsletter-btn:hover {
+      background: #8B0000;
+      color: #FFFFFF;
+      box-shadow: 0 0 20px rgba(139, 0, 0, 0.65);
+    }
+
+    .newsletter-feedback {
+      margin-top: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #D4AF37;
+      min-height: 18px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* -------------------------------------------------------------
+       SECTION 8: FOOTER
+       ------------------------------------------------------------- */
+    #site-footer {
+      position: relative;
+      width: 100%;
+      background: #050505;
+      border-top: 1px solid rgba(240, 240, 240, 0.06);
+      padding: 80px 50px 40px;
+      color: #F0F0F0;
+    }
+
+    .footer-top {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 60px;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .footer-brand-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: 42px;
+      letter-spacing: 3px;
+      color: #F0F0F0;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .footer-tagline {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      color: #777777;
+      max-width: 320px;
+    }
+
+    .footer-links-group {
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    .footer-col-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .footer-links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: #999999;
+    }
+
+    .footer-links-list a:hover {
+      color: #8B0000;
+    }
+
+    .footer-bottom {
+      max-width: 1300px;
+      margin: 0 auto;
+      border-top: 1px solid rgba(240, 240, 240, 0.06);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #555555;
+      text-transform: uppercase;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    /* Modal for Patron Action */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #141414;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      border-radius: 4px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      font-size: 24px;
+      color: #888888;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: #8B0000;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 992px) {
+      .site-nav {
+        top: 20px;
+        left: 20px;
+        right: 20px;
+      }
+      #mission-section {
+        flex-direction: column;
+      }
+      .mission-left {
+        width: 100%;
+        height: 50vh;
+        position: relative;
+      }
+      .mission-right {
+        width: 100%;
+      }
+      .mission-panel {
+        min-height: auto;
+        padding: 80px 28px;
+      }
+      .rail-card {
+        flex-direction: column;
+        height: auto;
+      }
+      .rail-card-media {
+        width: 100%;
+        height: 40vh;
+      }
+      .rail-card-content {
+        width: 100%;
+        padding: 32px 24px;
+      }
+      .reverse-grid {
+        grid-template-columns: 1fr;
+      }
+      .col-down {
+        margin-top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed 3px metallic gold scroll progress bar -->
+  <div id="global-progress-bar"></div>
+
+  <!-- Global Fixed Navbar (BUG FIX: Carefully placed inside viewfinder frame top:40px, left:50px, right:50px, z-index:999) -->
+  <header class="site-nav">
+    <div class="nav-brand">
+      <span class="nav-brand-dot"></span>
+      <span>AFSAR'S QUEST</span>
+    </div>
+    <a href="#donation-section" class="nav-donate-btn">SUPPORT THE QUEST</a>
+  </header>
+
+  <!-- =============================================================
+       SECTION 1: HERO SCROLL SEQUENCE (CANVAS & RETICLE HUD)
+       ============================================================= -->
+  <section id="hero-section">
+    <div class="hero-sticky-frame">
+      <!-- High-performance Canvas -->
+      <canvas id="hero-canvas"></canvas>
+
+      <!-- Fallback / poster video element -->
+      <video id="fallback-video" muted playsinline preload="auto" poster="images/Folded_vintage_newspaper_on_back._20261016222757.jpg">
+        <source src="activist-story.mp4" type="video/mp4">
+        <source src="activist-story.mp4.mp4" type="video/mp4">
+      </video>
+
+      <!-- Cinematic Vignette & Shadow Overlay -->
+      <div class="hero-cinematic-overlay"></div>
+
+      <!-- Viewfinder Brackets & HUD (Framing the viewport) -->
+      <div class="hud-corner hud-tl"></div>
+      <div class="hud-corner hud-tr"></div>
+      <div class="hud-corner hud-bl"></div>
+      <div class="hud-corner hud-br"></div>
+      <div class="hud-crosshair"></div>
+
+      <div class="hero-hud">
+        <div style="height: 50px;"></div> <!-- Spacer so top metadata sits below fixed nav -->
+        <div class="hud-bottom-meta">
+          <span id="hud-timecode">TC: 00:00:00:00</span>
+          <span>4K RAW • 24FPS • ISO 800</span>
+          <span>DISPATCH: LIVE [||||||||||--]</span>
+        </div>
+      </div>
+
+      <!-- Frame Sequence Loading Status Indicator -->
+      <div id="hero-loader">SYNCING INVESTIGATIVE FRAMES: <span id="hero-load-pct">0%</span></div>
+
+      <!-- Hero Text Overlays (Fade in/out across designated progress points) -->
+      <div class="hero-text-layer">
+        <!-- 0.05-0.15: AFSAR'S QUEST (110px Anton, centered) -->
+        <h1 class="overlay-text-1" id="overlay-1">AFSAR'S QUEST</h1>
+
+        <!-- 0.20-0.30: Unmasking the narrative. (26px Inter, centered) -->
+        <p class="overlay-text-2" id="overlay-2">Unmasking the narrative.</p>
+
+        <!-- 0.40-0.50: From propaganda to reality. (60px Anton, centered) -->
+        <h2 class="overlay-text-3" id="overlay-3">From propaganda to reality.</h2>
+
+        <!-- 0.60-0.70: The truth is independent. (60px Anton, centered) -->
+        <h2 class="overlay-text-4" id="overlay-4">The truth is independent.</h2>
+
+        <!-- 0.80-0.90: Decoding Geopolitics & Politics. (14px Inter uppercase, top 10% left 8%) -->
+        <div class="overlay-text-5" id="overlay-5">
+          <span>Decoding Geopolitics &amp; Politics.</span>
+        </div>
+      </div>
+
+      <!-- Scroll hint -->
+      <div class="hero-scroll-hint" id="hero-hint">
+        <span>SCROLL TO INVESTIGATE</span>
+        <div class="hero-scroll-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
+       ============================================================= -->
+  <section id="mission-section">
+    <!-- Left 50%: Sticky Image Container (position: sticky; top: 0; height: 100vh; overflow: hidden;) -->
+    <div class="mission-left">
+      <div class="mission-image-stack">
+        <!-- Panel 1 Image -->
+        <img src="images/Folded_vintage_newspaper_on_back._20261016222757.jpg" alt="The Media Narrative" class="mission-img active" data-mission-img="1">
+        <!-- Panel 2 Image -->
+        <img src="images/Vintage_newspaper_transforming_i._20261016223448.jpg" alt="The Geopolitics" class="mission-img" data-mission-img="2">
+        <!-- Panel 3 Image -->
+        <img src="images/Black_cinema_camera_stands_upright_20261016223513.jpg" alt="The Awakening" class="mission-img" data-mission-img="3">
+        <!-- Panel 4 Image -->
+        <img src="images/Filmmaker_recording_with_documen._20261016223553.jpg" alt="The Quest" class="mission-img" data-mission-img="4">
+        
+        <div class="mission-img-tint"></div>
+        <div class="mission-img-badge" id="mission-badge">PHASE 01 // DECONSTRUCTING NARRATIVES</div>
+      </div>
+    </div>
+
+    <!-- Right 50%: Four 100vh scrolling panels -->
+    <div class="mission-right">
+      <!-- Panel 1 -->
+      <div class="mission-panel" data-mission-panel="1">
+        <div class="mission-panel-index">01 / 04</div>
+        <h2 class="mission-panel-title">THE MEDIA NARRATIVE</h2>
+        <p class="mission-panel-quote">“Mainstream media sells a story. We deconstruct the propaganda.”</p>
+        <p class="mission-panel-desc">
+          Behind polished teleprompters and sanitized prime-time soundbites lies an architecture of curated perception. We dissect the manufactured consensus, unearthing the suppressed context and conflicting interests that corporate anchors are paid to ignore.
+        </p>
+      </div>
+
+      <!-- Panel 2 -->
+      <div class="mission-panel" data-mission-panel="2">
+        <div class="mission-panel-index">02 / 04</div>
+        <h2 class="mission-panel-title">THE GEOPOLITICS</h2>
+        <p class="mission-panel-quote">“Beyond borders. Understanding the hidden strings of power and politics.”</p>
+        <p class="mission-panel-desc">
+          Wars, sanction regimes, intelligence maneuvers, and backroom economic pacts are rarely what domestic press conferences claim. We map the international chess board to reveal who truly profits, who pays the price, and where power is really being concentrated.
+        </p>
+      </div>
+
+      <!-- Panel 3 -->
+      <div class="mission-panel" data-mission-panel="3">
+        <div class="mission-panel-index">03 / 04</div>
+        <h2 class="mission-panel-title">THE AWAKENING</h2>
+        <p class="mission-panel-quote">“Breaking down complex history and policies so you can see the whole picture.”</p>
+        <p class="mission-panel-desc">
+          History did not start this morning. By connecting decades-old foreign policy precedents, treaty loopholes, and economic records to breaking current events, we deliver investigative clarity that cuts through partisan noise.
+        </p>
+      </div>
+
+      <!-- Panel 4 -->
+      <div class="mission-panel" data-mission-panel="4">
+        <div class="mission-panel-index">04 / 04</div>
+        <h2 class="mission-panel-title">THE QUEST</h2>
+        <p class="mission-panel-quote">“Independent journalism relies on you. Join the movement for truth.”</p>
+        <p class="mission-panel-desc">
+          No oligarchs. No state subsidies. No corporate sponsors dictating red lines. Afsar's Quest belongs exclusively to the global community of thinkers and citizens who demand unvarnished, fearless truth.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 3: HORIZONTAL ACTION RAIL (BUG FIX: SCROLL LOGIC)
+       ============================================================= -->
+  <section id="action-rail-section">
+    <div class="rail-header">
+      <div class="rail-header-tag">INVESTIGATIVE DOSSIERS</div>
+      <h3 class="rail-header-title">THE 4 PILLARS OF INQUIRY</h3>
+    </div>
+
+    <div class="rail-track">
+      <!-- Rail Panel 1: POLITICAL SATIRE -->
+      <div class="rail-panel">
+        <div class="rail-card">
+          <div class="rail-card-media">
+            <img src="images/Partially_unfolded_vintage_newsp._20261016223417.jpg" alt="Political Satire">
+            <div class="rail-media-gradient"></div>
+          </div>
+          <div class="rail-card-content">
+            <div>
+              <div class="rail-card-meta">PILLAR 01 // SUBVERSION</div>
+              <h4 class="rail-card-title">POLITICAL SATIRE</h4>
+              <p class="rail-card-caption">
+                Satire is the sharpest scalpel against authoritarian pomposity. We use razor-sharp commentary and visual parody to puncture political posturing and reveal the absurdities of establishment rhetoric.
+              </p>
+            </div>
+            <div class="rail-card-footer">
+              <span>UNSPONSORED COMMENTARY</span>
+              <span>SHARP CRITIQUE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rail Panel 2: ELECTION ANALYSIS -->
+      <div class="rail-panel">
+        <div class="rail-card">
+          <div class="rail-card-media">
+            <img src="images/Unfolded_vintage_newspaper_display_20261016223435.jpg" alt="Election Analysis">
+            <div class="rail-media-gradient"></div>
+          </div>
+          <div class="rail-card-content">
+            <div>
+              <div class="rail-card-meta">PILLAR 02 // DEMOCRATIC PULSE</div>
+              <h4 class="rail-card-title">ELECTION ANALYSIS</h4>
+              <p class="rail-card-caption">
+                Deep data dives, gerrymandering breakdowns, lobbyist funding disclosures, and voter sentiment forensics. We investigate what happens when the ballot box meets the power broker machine.
+              </p>
+            </div>
+            <div class="rail-card-footer">
+              <span>DATA FORENSICS</span>
+              <span>CAMPAIGN FINANCE AUDIT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rail Panel 3: EXPOSING SYNDICATES -->
+      <div class="rail-panel">
+        <div class="rail-card">
+          <div class="rail-card-media">
+            <img src="images/Newspaper_forming_documentary_ca._20261016223458.jpg" alt="Exposing Syndicates">
+            <div class="rail-media-gradient"></div>
+          </div>
+          <div class="rail-card-content">
+            <div>
+              <div class="rail-card-meta">PILLAR 03 // ILLICIT NETWORKS</div>
+              <h4 class="rail-card-title">EXPOSING SYNDICATES</h4>
+              <p class="rail-card-caption">
+                Tracing offshore trusts, cartel connections, procurement kickbacks, and state-sanctioned monopolies. We unmask the financial and criminal syndicates operating behind the curtain of official bureaucracy.
+              </p>
+            </div>
+            <div class="rail-card-footer">
+              <span>LEAK AUDITS</span>
+              <span>FINANCIAL FOOTPRINTS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rail Panel 4: GLOBAL POLITICS -->
+      <div class="rail-panel">
+        <div class="rail-card">
+          <div class="rail-card-media">
+            <img src="images/Hand_picking_up_camera_20261016223522.jpg" alt="Global Politics">
+            <div class="rail-media-gradient"></div>
+          </div>
+          <div class="rail-card-content">
+            <div>
+              <div class="rail-card-meta">PILLAR 04 // WORLD ORDER</div>
+              <h4 class="rail-card-title">GLOBAL POLITICS</h4>
+              <p class="rail-card-caption">
+                From shifting multilateral trade treaties to proxy battlegrounds and digital sovereign surveillance. We deliver multi-polar geopolitical analysis tailored for citizens of the modern world.
+              </p>
+            </div>
+            <div class="rail-card-footer">
+              <span>MULTILATERAL BRIEFING</span>
+              <span>FRONTLINE REPORTERS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 4: PARALLAX STATEMENT
+       ============================================================= -->
+  <section id="parallax-statement">
+    <div class="parallax-bg-wrapper">
+      <img src="images/Black_cinema_camera_stands_upright_20261016223513.jpg" alt="Afsar's Quest Parallax" class="parallax-bg-img">
+    </div>
+    <div class="parallax-vignette"></div>
+    <div class="parallax-content">
+      <span class="parallax-badge">THE CREED</span>
+      <h2 class="parallax-heading">WE DON'T CONSUME THE NARRATIVE. WE QUESTION IT.</h2>
+      <p class="parallax-sub">FEARLESS INQUIRY. DEEP GEOPOLITICAL ROOTS. UNCOMPROMISED VISION.</p>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 5: REVERSE COLUMNS (BUG FIX: PARALLAX LOGIC)
+       col-up moves yPercent: -20, col-down moves yPercent: +20
+       ============================================================= -->
+  <section id="reverse-columns">
+    <div class="reverse-header">
+      <div class="reverse-header-tag">THE INVESTIGATIVE WIRE</div>
+      <h3 class="reverse-header-title">ARCHIVES OF THE QUEST</h3>
+    </div>
+
+    <div class="reverse-grid">
+      <!-- Column 1 (Moves UP: yPercent: -20) -->
+      <div class="rev-column col-up">
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Folded_vintage_newspaper_on_back._20261016222757.jpg" alt="Print Record" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 01 // DECLASSIFIED</div>
+            <h4 class="rev-card-title">THE MANUFACTURED CONSENSUS</h4>
+            <p class="rev-card-desc">Auditing historical propaganda campaigns that led nations into disastrous conflicts under false pretenses.</p>
+          </div>
+        </div>
+
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Partially_unfolded_vintage_newsp._20261016223417.jpg" alt="Dossier Leak" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 02 // OFFSHORE TRAILS</div>
+            <h4 class="rev-card-title">THE SYNDICATE LEDGER</h4>
+            <p class="rev-card-desc">Mapping hidden shell corporations and dark money conduits funneled into political campaigns.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2 (Moves DOWN: yPercent: +20) -->
+      <div class="rev-column col-down">
+        <!-- Centerpiece Stat Card -->
+        <div class="rev-card rev-quote-card">
+          <div class="rev-quote-stat">100%</div>
+          <div class="rev-quote-label">INDEPENDENT &amp; PATRON-BACKED</div>
+          <p class="rev-quote-body">
+            No corporate conglomerates. No foreign government grants. No algorithmic censorship. Built entirely on community solidarity.
+          </p>
+        </div>
+
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Vintage_newspaper_transforming_i._20261016223448.jpg" alt="Transformation" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 03 // THE METAMORPHOSIS</div>
+            <h4 class="rev-card-title">GEOPOLITICAL PIVOT POINTS</h4>
+            <p class="rev-card-desc">How shifting regional alliances rewrite energy corridors and dictate the next decade of diplomacy.</p>
+          </div>
+        </div>
+
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Newspaper_forming_documentary_ca._20261016223458.jpg" alt="Camera Construction" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 04 // THE LENS RIG</div>
+            <h4 class="rev-card-title">UNFILTERED BROADCASTS</h4>
+            <p class="rev-card-desc">Documentary filmmaking equipment deployed directly to geopolitical hotspots for unedited streaming.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3 (Moves UP: yPercent: -20) -->
+      <div class="rev-column col-up">
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Hand_picking_up_camera_20261016223522.jpg" alt="Field Deployment" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 05 // ACTION</div>
+            <h4 class="rev-card-title">FRONTLINE RESOLVE</h4>
+            <p class="rev-card-desc">Direct engagement with dissidents, whistleblowers, and insiders whose voices are blacklisted by television networks.</p>
+          </div>
+        </div>
+
+        <div class="rev-card">
+          <div class="rev-card-img-wrapper">
+            <img src="images/Filmmaker_recording_with_documen._20261016223553.jpg" alt="Documentary recording" class="rev-card-img">
+          </div>
+          <div class="rev-card-meta">
+            <div class="rev-card-tag">CASE 06 // GLOBAL REACH</div>
+            <h4 class="rev-card-title">CITIZEN EMPOWERMENT</h4>
+            <p class="rev-card-desc">Equipping over 5 million conscious viewers with actionable geopolitical intelligence every month.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 6: THE SUPPORT / DONATION SECTION (BUG FIX: 3D TOKEN IMG)
+       ============================================================= -->
+  <section id="donation-section">
+    <div class="donation-ambient-glow"></div>
+
+    <!-- BUG FIX: 3D Token img tag with continuous GSAP float animation -->
+    <div class="token-container">
+      <img src="images/quest-token.svg" alt="Afsar's Quest 3D Gold Token" class="token-3d-img">
+    </div>
+
+    <div class="donation-content">
+      <div class="donation-tag">PEOPLE-POWERED INDEPENDENT MEDIA</div>
+      <h2 class="donation-heading">FUEL THE QUEST</h2>
+      <p class="donation-desc">
+        Help sustain independent research and bold journalism. We answer to no advertisers, no board of directors, and no political party. Your direct patron backing funds field investigations, forensic data software, and legal protection.
+      </p>
+
+      <!-- Preset Donation Tiers in BDT (৳) -->
+      <div class="donation-tiers">
+        <button class="tier-btn" data-amount="500">৳500 / DISPATCH</button>
+        <button class="tier-btn active" data-amount="1000">৳1000 / FIELD BRIEF</button>
+        <button class="tier-btn" data-amount="5000">৳5000 / DEFENSE FUND</button>
+        <button class="tier-btn" data-amount="custom">CUSTOM</button>
+      </div>
+
+      <!-- Button: BECOME A PATRON (Hover turns #8B0000) -->
+      <button class="btn-support-creator" id="patron-btn">BECOME A PATRON</button>
+
+      <div class="donation-assurance">
+        🔒 256-BIT ENCRYPTED CHANNEL • CANCEL ANYTIME • INDEPENDENCE GUARANTEED
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 7: NEWSLETTER SECTION
+       ============================================================= -->
+  <section id="newsletter-section">
+    <div class="newsletter-overlay"></div>
+    <div class="newsletter-content">
+      <div class="newsletter-tag">DIRECT INTELLIGENCE WIRE</div>
+      <h2 class="newsletter-heading">STAY AHEAD OF THE NARRATIVE. JOIN THE MAILING LIST.</h2>
+      <p class="newsletter-sub">
+        Receive confidential research memos, unreleased documentary footage cuts, and emergency geopolitical briefs directly in your inbox before algorithms suppress them.
+      </p>
+
+      <form class="newsletter-form" id="newsletter-form" onsubmit="return false;">
+        <input type="email" class="newsletter-input" id="newsletter-email" placeholder="ENTER YOUR ENCRYPTED EMAIL ADDRESS..." required>
+        <button type="submit" class="newsletter-btn" id="newsletter-submit">SUBSCRIBE</button>
+      </form>
+      <div class="newsletter-feedback" id="newsletter-feedback"></div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       SECTION 8: FOOTER
+       ============================================================= -->
+  <footer id="site-footer">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand-title">AFSAR'S QUEST</div>
+        <p class="footer-tagline">
+          Independent geopolitical analysis &amp; political investigative documentary channel. Unmasking establishment propaganda and exploring the true dynamics of global power.
+        </p>
+      </div>
+
+      <div class="footer-links-group">
+        <div>
+          <div class="footer-col-title">SECTIONS</div>
+          <ul class="footer-links-list">
+            <li><a href="#hero-section">Hero Sequence</a></li>
+            <li><a href="#mission-section">Mission Explainer</a></li>
+            <li><a href="#action-rail-section">Action Rail</a></li>
+            <li><a href="#reverse-columns">Investigative Wire</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">PLATFORMS</div>
+          <ul class="footer-links-list">
+            <li><a href="#" target="_blank" rel="noopener">YouTube Channel</a></li>
+            <li><a href="#" target="_blank" rel="noopener">Substack Geopolitical Dossiers</a></li>
+            <li><a href="#" target="_blank" rel="noopener">Telegram Encrypted Wire</a></li>
+            <li><a href="#" target="_blank" rel="noopener">X / Twitter (@AfsarsQuest)</a></li>
+            <li><a href="#" target="_blank" rel="noopener">Instagram Documentaries</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">FIELD DATA</div>
+          <ul class="footer-links-list">
+            <li><span>COORD: 23.8103° N, 90.4125° E</span></li>
+            <li><span>FREQUENCY: 1420.405 MHz</span></li>
+            <li><span>SIGNAL: 100% UNFILTERED</span></li>
+            <li><span>PGP: 7B39 00EA F991 C4B2</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 AFSAR'S QUEST. ALL RIGHTS RESERVED. TRUTH UNCOMPROMISED.</div>
+      <div>DESIGNED &amp; DEVELOPED BY AHNAF</div>
+    </div>
+  </footer>
+
+  <!-- Modal for Patron Confirmation -->
+  <div class="modal-backdrop" id="patron-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="donation-tag">PATRON VERIFICATION</div>
+      <h3 style="font-family: 'Anton', Impact, sans-serif; font-size: 32px; color: #F0F0F0; margin-bottom: 12px; letter-spacing: 2px;">CONFIRM YOUR PATRONAGE</h3>
+      <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: #A0A0A0; margin-bottom: 24px; line-height: 1.6;">
+        You are contributing <strong id="modal-amount-display" style="color: #D4AF37;">৳1000</strong> to fund independent research, field gear, and investigative dispatches.
+      </p>
+      <button class="btn-support-creator" style="width: 100%;" id="modal-confirm-btn">CONFIRM PATRON CONTRIBUTION</button>
+    </div>
+  </div>
+
+  <!-- =============================================================
+       JAVASCRIPT: LENIS, GSAP SCROLLTRIGGER, CANVAS SEQUENCE
+       ============================================================= -->
+  <script>
+    /* -----------------------------------------------------------
+       1. LENIS SMOOTH SCROLL SETUP & SYNC WITH GSAP
+       ----------------------------------------------------------- */
+    const lenis = new Lenis({
+      lerp: 0.1,
+      autoRaf: false,
+      smoothWheel: true
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+
+    /* -----------------------------------------------------------
+       2. GLOBAL PROGRESS BAR (Fixed 3px metallic gold right edge)
+       ----------------------------------------------------------- */
+    const globalProgressBar = document.getElementById('global-progress-bar');
+    
+    function updateGlobalProgressBar() {
+      const scrollY = window.scrollY || window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min(1, Math.max(0, scrollY / docHeight)) : 0;
+      globalProgressBar.style.height = `${progress * 100}vh`;
+    }
+
+    window.addEventListener('scroll', updateGlobalProgressBar, { passive: true });
+    updateGlobalProgressBar();
+
+    /* -----------------------------------------------------------
+       3. HERO CANVAS IMAGE SEQUENCE & TEXT OVERLAYS
+       ----------------------------------------------------------- */
+    const TOTAL_FRAMES = 240;
+    const heroSection = document.getElementById('hero-section');
+    const heroCanvas = document.getElementById('hero-canvas');
+    const ctx = heroCanvas.getContext('2d');
+    const heroLoader = document.getElementById('hero-loader');
+    const heroLoadPct = document.getElementById('hero-load-pct');
+    const hudTimecode = document.getElementById('hud-timecode');
+    const heroHint = document.getElementById('hero-hint');
+
+    // Overlays
+    const overlay1 = document.getElementById('overlay-1');
+    const overlay2 = document.getElementById('overlay-2');
+    const overlay3 = document.getElementById('overlay-3');
+    const overlay4 = document.getElementById('overlay-4');
+    const overlay5 = document.getElementById('overlay-5');
+
+    // Preloaded frames array
+    const frames = [];
+    let loadedCount = 0;
+    let currentRenderedIndex = -1;
+
+    function getFramePath(index) {
+      const numStr = String(index + 1).padStart(4, '0');
+      return `frames/frame_${numStr}.jpg`;
+    }
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      heroCanvas.width = window.innerWidth * dpr;
+      heroCanvas.height = window.innerHeight * dpr;
+      heroCanvas.style.width = window.innerWidth + 'px';
+      heroCanvas.style.height = window.innerHeight + 'px';
+      if (currentRenderedIndex >= 0) {
+        drawFrameToCanvas(currentRenderedIndex);
+      }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawImageCover(img) {
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+      const canvasWidth = heroCanvas.width;
+      const canvasHeight = heroCanvas.height;
+      const imgWidth = img.naturalWidth;
+      const imgHeight = img.naturalHeight;
+
+      const scale = Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight);
+      const drawWidth = imgWidth * scale;
+      const drawHeight = imgHeight * scale;
+      const x = (canvasWidth - drawWidth) / 2;
+      const y = (canvasHeight - drawHeight) / 2;
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.drawImage(img, x, y, drawWidth, drawHeight);
+    }
+
+    function drawFrameToCanvas(targetIndex) {
+      let img = frames[targetIndex];
+      if (!img || !img.complete || img.naturalWidth === 0) {
+        // Fallback to closest loaded frame
+        for (let i = targetIndex - 1; i >= 0; i--) {
+          if (frames[i] && frames[i].complete && frames[i].naturalWidth > 0) {
+            img = frames[i];
+            break;
+          }
+        }
+        if (!img || !img.complete) {
+          for (let i = targetIndex + 1; i < TOTAL_FRAMES; i++) {
+            if (frames[i] && frames[i].complete && frames[i].naturalWidth > 0) {
+              img = frames[i];
+              break;
+            }
+          }
+        }
+      }
+
+      if (img && img.complete) {
+        drawImageCover(img);
+        currentRenderedIndex = targetIndex;
+      }
+    }
+
+    // Preload image sequence
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      const img = new Image();
+      img.src = getFramePath(i);
+      img.onload = () => {
+        loadedCount++;
+        const pct = Math.floor((loadedCount / TOTAL_FRAMES) * 100);
+        if (heroLoadPct) heroLoadPct.textContent = `${pct}%`;
+
+        if (i === 0 && currentRenderedIndex === -1) {
+          drawFrameToCanvas(0);
+        }
+
+        if (loadedCount >= 25 && heroLoader) {
+          heroLoader.style.opacity = '0';
+        }
+      };
+      frames.push(img);
+    }
+
+    // Helper: calculate trapezoidal opacity for smooth range transition
+    function calculateRangeOpacity(progress, start, end) {
+      if (progress < start || progress > end) return 0;
+      const range = end - start;
+      const fadeSpan = range * 0.22;
+      if (progress < start + fadeSpan) {
+        return (progress - start) / fadeSpan;
+      }
+      if (progress > end - fadeSpan) {
+        return (end - progress) / fadeSpan;
+      }
+      return 1;
+    }
+
+    function calculateRangeY(progress, start, end) {
+      if (progress < start || progress > end) return 20;
+      const norm = (progress - start) / (end - start);
+      return (1 - norm) * 16 - 8;
+    }
+
+    function updateHeroScroll() {
+      const rect = heroSection.getBoundingClientRect();
+      const scrollableDist = heroSection.offsetHeight - window.innerHeight;
+      
+      let progress = 0;
+      if (scrollableDist > 0) {
+        progress = -rect.top / scrollableDist;
+        progress = Math.max(0, Math.min(1, progress));
+      }
+
+      // Draw canvas frame
+      const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+      drawFrameToCanvas(frameIndex);
+
+      // Viewfinder timecode
+      const totalSec = (frameIndex / 24);
+      const minutes = String(Math.floor(totalSec / 60)).padStart(2, '0');
+      const seconds = String(Math.floor(totalSec % 60)).padStart(2, '0');
+      const frameNum = String(frameIndex % 24).padStart(2, '0');
+      if (hudTimecode) {
+        hudTimecode.textContent = `TC: 00:${minutes}:${seconds}:${frameNum}`;
+      }
+
+      // Text Overlays Exact Ranges:
+      // 0.05-0.15: AFSAR'S QUEST (110px Anton, centered)
+      const op1 = calculateRangeOpacity(progress, 0.05, 0.15);
+      const y1 = calculateRangeY(progress, 0.05, 0.15);
+      overlay1.style.opacity = op1;
+      overlay1.style.transform = `translate(-50%, calc(-50% + ${y1}px)) scale(${0.96 + op1 * 0.04})`;
+
+      // 0.20-0.30: Unmasking the narrative. (26px Inter, centered)
+      const op2 = calculateRangeOpacity(progress, 0.20, 0.30);
+      const y2 = calculateRangeY(progress, 0.20, 0.30);
+      overlay2.style.opacity = op2;
+      overlay2.style.transform = `translate(-50%, calc(-50% + ${y2}px))`;
+
+      // 0.40-0.50: From propaganda to reality. (60px Anton, centered)
+      const op3 = calculateRangeOpacity(progress, 0.40, 0.50);
+      const y3 = calculateRangeY(progress, 0.40, 0.50);
+      overlay3.style.opacity = op3;
+      overlay3.style.transform = `translate(-50%, calc(-50% + ${y3}px)) scale(${0.96 + op3 * 0.04})`;
+
+      // 0.60-0.70: The truth is independent. (60px Anton, centered)
+      const op4 = calculateRangeOpacity(progress, 0.60, 0.70);
+      const y4 = calculateRangeY(progress, 0.60, 0.70);
+      overlay4.style.opacity = op4;
+      overlay4.style.transform = `translate(-50%, calc(-50% + ${y4}px)) scale(${0.96 + op4 * 0.04})`;
+
+      // 0.80-0.90: Decoding Geopolitics & Politics. (14px Inter uppercase, top 10% left 8%)
+      const op5 = calculateRangeOpacity(progress, 0.80, 0.90);
+      overlay5.style.opacity = op5;
+      overlay5.style.transform = `translateY(${ (1 - op5) * 12 }px)`;
+
+      if (progress > 0.02 && heroHint) {
+        heroHint.style.opacity = '0';
+      } else if (heroHint) {
+        heroHint.style.opacity = '0.7';
+      }
+    }
+
+    window.addEventListener('scroll', updateHeroScroll, { passive: true });
+    updateHeroScroll();
+
+    /* -----------------------------------------------------------
+       4. SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
+       ----------------------------------------------------------- */
+    const missionImages = document.querySelectorAll('.mission-img');
+    const missionPanels = document.querySelectorAll('.mission-panel');
+    const missionBadge = document.getElementById('mission-badge');
+
+    const badgeDescriptions = {
+      '1': 'PHASE 01 // DECONSTRUCTING NARRATIVES',
+      '2': 'PHASE 02 // GEOPOLITICAL ARCHITECTURE',
+      '3': 'PHASE 03 // HISTORICAL CONTEXT',
+      '4': 'PHASE 04 // THE PEOPLE\'S CRUSADE'
+    };
+
+    const missionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const panelNum = entry.target.getAttribute('data-mission-panel');
+          
+          missionImages.forEach(img => {
+            if (img.getAttribute('data-mission-img') === panelNum) {
+              img.classList.add('active');
+            } else {
+              img.classList.remove('active');
+            }
+          });
+
+          if (missionBadge && badgeDescriptions[panelNum]) {
+            missionBadge.textContent = badgeDescriptions[panelNum];
+          }
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.45
+    });
+
+    missionPanels.forEach(panel => missionObserver.observe(panel));
+
+    /* -----------------------------------------------------------
+       5. SECTION 3: HORIZONTAL ACTION RAIL (BUG FIX: SCROLL LOGIC)
+       Pin main section using GSAP and translate track container
+       ----------------------------------------------------------- */
+    const railSection = document.getElementById('action-rail-section');
+    const railTrack = document.querySelector('.rail-track');
+
+    gsap.to(railTrack, {
+      x: () => -(railTrack.scrollWidth - window.innerWidth),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: railSection,
+        pin: true,
+        scrub: 1,
+        end: () => '+=' + (railTrack.scrollWidth - window.innerWidth),
+        invalidateOnRefresh: true
+      }
+    });
+
+    /* -----------------------------------------------------------
+       6. SECTION 4: PARALLAX STATEMENT (yPercent: 20)
+       ----------------------------------------------------------- */
+    gsap.to('.parallax-bg-wrapper', {
+      yPercent: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#parallax-statement',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+
+    /* -----------------------------------------------------------
+       7. SECTION 5: REVERSE COLUMNS (BUG FIX: PARALLAX LOGIC)
+       col-up moves yPercent: -20, col-down moves yPercent: +20
+       ----------------------------------------------------------- */
+    gsap.utils.toArray('.col-up').forEach(col => {
+      gsap.to(col, {
+        yPercent: -20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#reverse-columns',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    });
+
+    gsap.utils.toArray('.col-down').forEach(col => {
+      gsap.to(col, {
+        yPercent: 20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#reverse-columns',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    });
+
+    /* -----------------------------------------------------------
+       8. SECTION 6: SUPPORT SECTION (BUG FIX: 3D TOKEN FLOAT)
+       Continuous GSAP floating animation: yoyo: true, repeat: -1, y: 15, duration: 2
+       ----------------------------------------------------------- */
+    const tokenImg = document.querySelector('.token-3d-img');
+    if (tokenImg) {
+      gsap.to(tokenImg, {
+        y: 15,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'power1.inOut'
+      });
+    }
+
+    // Logo Scroll-to-Top via Lenis
+    const navBrand = document.querySelector('.nav-brand');
+    if (navBrand) {
+      navBrand.addEventListener('click', (e) => {
+        e.preventDefault();
+        lenis.scrollTo(0, { duration: 1.5 });
+      });
+    }
+
+    // Donation amount selector (in BDT ৳)
+    const tierButtons = document.querySelectorAll('.tier-btn');
+    let selectedAmount = '1000';
+
+    tierButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tierButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedAmount = btn.getAttribute('data-amount');
+      });
+    });
+
+    // Patron Modal Interactions
+    const patronBtn = document.getElementById('patron-btn');
+    const patronModal = document.getElementById('patron-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalAmountDisplay = document.getElementById('modal-amount-display');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+    if (patronBtn && patronModal) {
+      patronBtn.addEventListener('click', () => {
+        const displayVal = selectedAmount === 'custom' ? '৳2,500 (Custom)' : `৳${selectedAmount}`;
+        if (modalAmountDisplay) modalAmountDisplay.textContent = displayVal;
+        patronModal.classList.add('open');
+      });
+
+      modalClose.addEventListener('click', () => {
+        patronModal.classList.remove('open');
+      });
+
+      patronModal.addEventListener('click', (e) => {
+        if (e.target === patronModal) patronModal.classList.remove('open');
+      });
+
+      modalConfirmBtn.addEventListener('click', () => {
+        modalConfirmBtn.textContent = 'TRANSMISSION LOGGED...';
+        modalConfirmBtn.style.background = '#8B0000';
+        modalConfirmBtn.style.color = '#FFFFFF';
+        modalConfirmBtn.style.borderColor = '#8B0000';
+        setTimeout(() => {
+          patronModal.classList.remove('open');
+          modalConfirmBtn.textContent = 'CONFIRM PATRON CONTRIBUTION';
+          modalConfirmBtn.style.background = '';
+          modalConfirmBtn.style.color = '';
+          modalConfirmBtn.style.borderColor = '';
+          alert("Welcome to the Quest! Your patron commitment to uncompromised truth has been verified.");
+        }, 1200);
+      });
+    }
+
+    /* -----------------------------------------------------------
+       9. NEWSLETTER FORM HANDLER
+       ----------------------------------------------------------- */
+    const newsletterForm = document.getElementById('newsletter-form');
+    const newsletterEmail = document.getElementById('newsletter-email');
+    const newsletterFeedback = document.getElementById('newsletter-feedback');
+
+    if (newsletterForm) {
+      newsletterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = newsletterEmail.value.trim();
+        if (email) {
+          newsletterFeedback.style.opacity = '1';
+          newsletterFeedback.textContent = 'ENCRYPTED DISPATCH FREQUENCY CONFIRMED. WELCOME TO THE MAILING LIST.';
+          newsletterEmail.value = '';
+          setTimeout(() => {
+            newsletterFeedback.style.opacity = '0';
+          }, 6000);
+        }
+      });
+    }
+
+    /* -----------------------------------------------------------
+       10. REFRESH SCROLLTRIGGER AT END OF SCRIPT
+       ----------------------------------------------------------- */
+    ScrollTrigger.refresh();
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Cancelled | AFSAR'S QUEST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0C0C0C;
+      color: #F0F0F0;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .card {
+      position: relative;
+      z-index: 2;
+      background: #141414;
+      border: 1px solid rgba(240, 240, 240, 0.12);
+      padding: 56px 40px;
+      max-width: 520px;
+      width: 100%;
+      border-radius: 4px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+    }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #888888;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(32px, 4.5vw, 42px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #F0F0F0;
+      margin-bottom: 16px;
+    }
+    p {
+      font-size: 15px;
+      font-weight: 300;
+      color: #999999;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .btn-retry {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #0C0C0C;
+      background: #D4AF37;
+      padding: 16px 36px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .btn-retry:hover {
+      background: #8B0000;
+      color: #FFFFFF;
+      box-shadow: 0 0 20px rgba(139, 0, 0, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="tag">GATEWAY STATUS: CANCELLED</div>
+    <h1>TRANSACTION ABORTED</h1>
+    <p>
+      Your payment process was cancelled and no funds were debited. You can return to the Quest anytime to back our independent coverage.
+    </p>
+    <a href="/#donation-section" class="btn-retry">RETURN TO DONATION</a>
+  </div>
+</body>
+</html>

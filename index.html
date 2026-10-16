@@ -1781,6 +1781,14 @@
         <button class="tier-btn" data-amount="custom">CUSTOM</button>
       </div>
 
+      <!-- Custom Amount Input Field (toggled on CUSTOM tier click) -->
+      <div id="custom-amount-wrap" style="display: none; justify-content: center; margin-bottom: 28px;">
+        <div style="display: flex; align-items: center; background: #141414; border: 1.5px solid #D4AF37; border-radius: 2px; padding: 10px 18px; max-width: 320px; width: 100%;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: #D4AF37; margin-right: 10px; font-weight: 700;">৳</span>
+          <input type="number" id="custom-amount-input" placeholder="ENTER AMOUNT (BDT)" min="10" step="50" value="2500" style="background: transparent; border: none; outline: none; color: #F0F0F0; font-family: 'JetBrains Mono', monospace; font-size: 15px; width: 100%; font-weight: 600;">
+        </div>
+      </div>
+
       <!-- Button: BECOME A PATRON (Hover turns #8B0000) -->
       <button class="btn-support-creator" id="patron-btn">BECOME A PATRON</button>
 
@@ -2226,53 +2234,93 @@
       });
     }
 
-    // Donation amount selector (in BDT ৳)
+    /* -----------------------------------------------------------
+       8. DESHI PAY API INTEGRATION & DONATION HANDLER
+       ----------------------------------------------------------- */
+    const DESHIPAY_API_KEY = "uSUtTuB2etidtkf3v0nhOl2JiEK9VpbpzPmlAo6pYAHJKxNk3X";
+
     const tierButtons = document.querySelectorAll('.tier-btn');
+    const customAmountWrap = document.getElementById('custom-amount-wrap');
+    const customAmountInput = document.getElementById('custom-amount-input');
+    const patronBtn = document.getElementById('patron-btn');
     let selectedAmount = '1000';
 
+    // Tier selection & Custom amount toggle
     tierButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         tierButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedAmount = btn.getAttribute('data-amount');
+        if (selectedAmount === 'custom') {
+          if (customAmountWrap) customAmountWrap.style.display = 'flex';
+          if (customAmountInput) customAmountInput.focus();
+        } else {
+          if (customAmountWrap) customAmountWrap.style.display = 'none';
+        }
       });
     });
 
-    // Patron Modal Interactions
-    const patronBtn = document.getElementById('patron-btn');
-    const patronModal = document.getElementById('patron-modal');
-    const modalClose = document.getElementById('modal-close');
-    const modalAmountDisplay = document.getElementById('modal-amount-display');
-    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    // "BECOME A PATRON" Click Handler: Deshi Pay Checkout
+    if (patronBtn) {
+      patronBtn.addEventListener('click', async () => {
+        // 1. Retrieve the exact BDT donation amount selected
+        let donationAmount = 1000;
+        if (selectedAmount === 'custom') {
+          const val = parseFloat(customAmountInput ? customAmountInput.value : '');
+          if (!val || val <= 0 || isNaN(val)) {
+            alert('Please enter a valid donation amount in BDT (৳).');
+            if (customAmountInput) customAmountInput.focus();
+            return;
+          }
+          donationAmount = Number(val);
+        } else {
+          donationAmount = Number(selectedAmount) || 1000;
+        }
 
-    if (patronBtn && patronModal) {
-      patronBtn.addEventListener('click', () => {
-        const displayVal = selectedAmount === 'custom' ? '৳2,500 (Custom)' : `৳${selectedAmount}`;
-        if (modalAmountDisplay) modalAmountDisplay.textContent = displayVal;
-        patronModal.classList.add('open');
-      });
+        // 2. Change button text to "PROCESSING..." and disable it
+        const originalText = patronBtn.textContent;
+        patronBtn.textContent = 'PROCESSING...';
+        patronBtn.disabled = true;
+        patronBtn.style.opacity = '0.7';
+        patronBtn.style.cursor = 'not-allowed';
 
-      modalClose.addEventListener('click', () => {
-        patronModal.classList.remove('open');
-      });
+        try {
+          // 3. Make POST request using Fetch API
+          const response = await fetch('https://paydeshipay.themedokan.com/api/payment/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'API-KEY': DESHIPAY_API_KEY
+            },
+            body: JSON.stringify({
+              cus_name: "Afsar's Quest Patron",
+              cus_email: "patron@example.com",
+              amount: donationAmount,
+              success_url: window.location.origin + "/success.html",
+              cancel_url: window.location.origin + "/cancel.html"
+            })
+          });
 
-      patronModal.addEventListener('click', (e) => {
-        if (e.target === patronModal) patronModal.classList.remove('open');
-      });
+          const data = await response.json();
 
-      modalConfirmBtn.addEventListener('click', () => {
-        modalConfirmBtn.textContent = 'TRANSMISSION LOGGED...';
-        modalConfirmBtn.style.background = '#8B0000';
-        modalConfirmBtn.style.color = '#FFFFFF';
-        modalConfirmBtn.style.borderColor = '#8B0000';
-        setTimeout(() => {
-          patronModal.classList.remove('open');
-          modalConfirmBtn.textContent = 'CONFIRM PATRON CONTRIBUTION';
-          modalConfirmBtn.style.background = '';
-          modalConfirmBtn.style.color = '';
-          modalConfirmBtn.style.borderColor = '';
-          alert("Welcome to the Quest! Your patron commitment to uncompromised truth has been verified.");
-        }, 1200);
+          // 4. Response Handling
+          if ((data.status === true || data.status === 1) && data.payment_url) {
+            window.location.href = data.payment_url;
+          } else {
+            alert(data && data.message ? data.message : 'Payment initiation failed. Please try again.');
+            patronBtn.textContent = originalText;
+            patronBtn.disabled = false;
+            patronBtn.style.opacity = '1';
+            patronBtn.style.cursor = 'pointer';
+          }
+        } catch (err) {
+          console.error('Payment Error:', err);
+          alert('Unable to connect to Deshi Pay payment gateway. Please check your connection and try again.');
+          patronBtn.textContent = originalText;
+          patronBtn.disabled = false;
+          patronBtn.style.opacity = '1';
+          patronBtn.style.cursor = 'pointer';
+        }
       });
     }
 

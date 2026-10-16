@@ -3,78 +3,222 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contribution Confirmed | AFSAR'S QUEST</title>
+  <title>TRANSACTION SECURED // AFSAR'S QUEST</title>
+  
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-color: #0C0C0C;
+      --card-bg: #141414;
+      --text-color: #F0F0F0;
+      --muted-text: #9E9E9E;
+      --gold: #D4AF37;
+      --gold-dim: rgba(212, 175, 55, 0.15);
+      --gold-border: rgba(212, 175, 55, 0.4);
+      --red-accent: #8B0000;
+    }
+
     body {
-      background-color: #0C0C0C;
-      color: #F0F0F0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 20px;
+      padding: 40px 24px;
       text-align: center;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 65%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
     }
+
+    /* Ambient Spotlight */
     .ambient-glow {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
+      z-index: 1;
+      filter: blur(60px);
     }
+
+    /* Corner Viewfinder HUD brackets */
+    .hud-corner {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      border-color: rgba(212, 175, 55, 0.35);
+      pointer-events: none;
+      z-index: 5;
+    }
+    .hud-corner.tl { top: 24px; left: 24px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); }
+    .hud-corner.tr { top: 24px; right: 24px; border-top: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+    .hud-corner.bl { bottom: 24px; left: 24px; border-bottom: 2px solid var(--gold); border-left: 2px solid var(--gold); }
+    .hud-corner.br { bottom: 24px; right: 24px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+
+    /* Dossier Container Card */
     .card {
       position: relative;
       z-index: 2;
-      background: #141414;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      padding: 56px 40px;
-      max-width: 560px;
+      background: var(--card-bg);
+      border: 1px solid var(--gold-border);
+      padding: clamp(36px, 6vw, 64px) clamp(24px, 5vw, 56px);
+      max-width: 660px;
       width: 100%;
-      border-radius: 4px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+      border-radius: 3px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.08);
+      backdrop-filter: blur(12px);
     }
-    .token-img {
-      width: 110px;
-      height: 110px;
-      margin: 0 auto 24px;
-      filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.4));
-    }
-    .tag {
+
+    /* Top Classification Stamp */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
+      font-weight: 700;
       letter-spacing: 3px;
-      color: #D4AF37;
+      color: var(--gold);
+      background: var(--gold-dim);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 8px 18px;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 28px;
+      border-radius: 2px;
     }
-    h1 {
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Main Heading */
+    h1.main-title {
       font-family: 'Anton', Impact, sans-serif;
-      font-size: clamp(34px, 5vw, 46px);
-      letter-spacing: 2px;
+      font-size: clamp(38px, 6vw, 58px);
+      letter-spacing: 3px;
       text-transform: uppercase;
-      color: #F0F0F0;
-      margin-bottom: 16px;
-      line-height: 1.1;
+      color: var(--gold);
+      margin-bottom: 18px;
+      line-height: 1.05;
+      text-shadow: 0 0 35px rgba(212, 175, 55, 0.35);
     }
-    p {
-      font-size: 15px;
+
+    /* Subtext */
+    p.subtext {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(15px, 2vw, 17px);
       font-weight: 300;
-      color: #A0A0A0;
-      line-height: 1.7;
-      margin-bottom: 32px;
+      color: var(--text-color);
+      line-height: 1.65;
+      margin-bottom: 34px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .btn-home {
+
+    /* Secret Dossier Log Section */
+    .dossier-box {
+      background: #0B0B0B;
+      border: 1px solid rgba(240, 240, 240, 0.12);
+      border-left: 3px solid var(--gold);
+      padding: 22px 24px;
+      margin-bottom: 38px;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #D6D6D6;
+      border-radius: 2px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .dossier-header {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(212, 175, 55, 0.25);
+      padding-bottom: 8px;
+    }
+
+    .dossier-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      line-height: 1.5;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      word-break: break-all;
+    }
+
+    .dossier-row:last-child {
+      border-bottom: none;
+    }
+
+    .dossier-label {
+      color: #888888;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      min-width: 120px;
+    }
+
+    .dossier-value {
+      color: #FFFFFF;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .dossier-primary-log {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* Action Button */
+    .btn-action {
       display: inline-block;
       font-family: 'Inter', sans-serif;
       font-size: 13px;
@@ -82,30 +226,193 @@
       letter-spacing: 3px;
       text-transform: uppercase;
       color: #0C0C0C;
-      background: #D4AF37;
-      padding: 16px 36px;
+      background: var(--gold);
+      padding: 18px 44px;
       border-radius: 2px;
       text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 4px 25px rgba(212, 175, 55, 0.35);
+      position: relative;
+      overflow: hidden;
     }
-    .btn-home:hover {
-      background: #8B0000;
-      color: #FFFFFF;
-      box-shadow: 0 0 25px rgba(139, 0, 0, 0.6);
+
+    .btn-action:hover {
+      background: #FFFFFF;
+      color: #0C0C0C;
+      box-shadow: 0 6px 35px rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .footer-stamp {
+      margin-top: 26px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #555555;
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
+  <!-- Ambient background glow -->
   <div class="ambient-glow"></div>
+
+  <!-- Viewfinder corners -->
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+
+  <!-- Content Card -->
   <div class="card">
-    <img src="images/quest-token.svg" alt="Afsar's Quest Token" class="token-img">
-    <div class="tag">PATRON VERIFIED // DESHI PAY</div>
-    <h1>MISSION FUNDED</h1>
-    <p>
-      Thank you for your fearless patronage. Your contribution directly fuels independent investigations, encrypted dispatches, and geopolitical research. The truth remains uncompromised.
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span>DISPATCH ENCRYPTED // DESHI PAY VERIFIED</span>
+    </div>
+
+    <h1 class="main-title" id="main-title">TRANSACTION SECURED</h1>
+
+    <p class="subtext">
+      Welcome to the resistance. Your funding fuels independent truth.
     </p>
-    <a href="/" class="btn-home">RETURN TO THE QUEST</a>
+
+    <!-- Secret Dossier Log -->
+    <div class="dossier-box" id="dossier-box">
+      <div class="dossier-header">
+        <span>SECURITY DOSSIER // FIELD LOG</span>
+        <span>DHAKA BUREAU: 23.8103° N, 90.4125° E</span>
+      </div>
+
+      <div class="dossier-row">
+        <span class="dossier-label">TRANSACTION ID</span>
+        <span class="dossier-value" id="dossier-trx-id">AQ-SEC-89104</span>
+      </div>
+
+      <div class="dossier-row">
+        <span class="dossier-label">AMOUNT FUNDED</span>
+        <span class="dossier-value" id="dossier-amount">৳1,000</span>
+      </div>
+
+      <div class="dossier-row">
+        <span class="dossier-label">CHANNEL STATUS</span>
+        <span class="dossier-value" style="color: #4BB543;">ENCRYPTED &amp; SECURED</span>
+      </div>
+
+      <div class="dossier-row">
+        <span class="dossier-label">TIMESTAMP</span>
+        <span class="dossier-value" id="dossier-time">2026-10-17 01:20:00 UTC</span>
+      </div>
+
+      <!-- Specific required format display -->
+      <div class="dossier-primary-log" id="dossier-primary-log">
+        LOG ID: [TRANSACTION_ID] | AMOUNT: ৳[PAYMENT_AMOUNT]
+      </div>
+    </div>
+
+    <!-- Action Link -->
+    <a href="index.html" class="btn-action" id="btn-return">RETURN TO BRIEFING</a>
+
+    <div class="footer-stamp">
+      AFSAR'S QUEST // INDEPENDENT INVESTIGATIVE DOSSIER
+    </div>
   </div>
+
+  <script>
+    // 1. Extract transactionId and paymentAmount from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check possible param variations sent back by Deshi Pay or gateways
+    const transactionId = urlParams.get('transactionId') || 
+                          urlParams.get('trx_id') || 
+                          urlParams.get('transaction_id') || 
+                          urlParams.get('tran_id') || 
+                          urlParams.get('tx_id') || 
+                          ('AQ-' + Math.floor(100000 + Math.random() * 900000));
+
+    let paymentAmount = urlParams.get('paymentAmount') || 
+                        urlParams.get('amount') || 
+                        urlParams.get('paid_amount') || 
+                        '1,000';
+
+    // Format amount with currency symbol cleanly
+    let formattedAmount = paymentAmount.toString().replace(/[^0-9.,]/g, '');
+    if (!formattedAmount) formattedAmount = '1,000';
+
+    // 2. Populate UI elements
+    const trxEl = document.getElementById('dossier-trx-id');
+    const amtEl = document.getElementById('dossier-amount');
+    const primaryLogEl = document.getElementById('dossier-primary-log');
+    const timeEl = document.getElementById('dossier-time');
+
+    if (trxEl) trxEl.textContent = transactionId;
+    if (amtEl) amtEl.textContent = '৳' + formattedAmount;
+    if (primaryLogEl) {
+      primaryLogEl.textContent = `LOG ID: ${transactionId} | AMOUNT: ৳${formattedAmount}`;
+    }
+
+    if (timeEl) {
+      const now = new Date();
+      timeEl.textContent = now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    }
+
+    // 3. GSAP Cinematic Animations
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof gsap !== 'undefined') {
+        const tl = gsap.timeline();
+
+        // Animate classification badge
+        tl.from(".badge", {
+          opacity: 0,
+          y: -18,
+          duration: 0.7,
+          ease: "power2.out"
+        })
+        // Slow cinematic fade-up and slight scale-in on the main heading
+        .from("#main-title", {
+          opacity: 0,
+          y: 35,
+          scale: 0.94,
+          duration: 1.2,
+          ease: "power3.out"
+        }, "-=0.3")
+        // Subtext fade-in
+        .from(".subtext", {
+          opacity: 0,
+          y: 18,
+          duration: 0.8,
+          ease: "power2.out"
+        }, "-=0.6")
+        // Dossier container box reveal
+        .from("#dossier-box", {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          ease: "power2.out"
+        }, "-=0.4")
+        // Stagger fade-in the dossier log rows one by one
+        .from(".dossier-row", {
+          opacity: 0,
+          x: -16,
+          stagger: 0.12,
+          duration: 0.6,
+          ease: "power2.out"
+        }, "-=0.4")
+        // Primary dossier log highlight
+        .from("#dossier-primary-log", {
+          opacity: 0,
+          scale: 0.96,
+          duration: 0.6,
+          ease: "back.out(1.4)"
+        }, "-=0.2")
+        // Return button reveal
+        .from("#btn-return", {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          ease: "power2.out"
+        }, "-=0.3");
+      }
+    });
+  </script>
 </body>
 </html>

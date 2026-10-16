@@ -3,89 +3,386 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Cancelled | AFSAR'S QUEST</title>
+  <title>TRANSACTION INTERCEPTED // AFSAR'S QUEST</title>
+  
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-color: #0C0C0C;
+      --card-bg: #141414;
+      --text-color: #F0F0F0;
+      --muted-text: #9E9E9E;
+      --crimson: #8B0000;
+      --crimson-bright: #B22222;
+      --crimson-dim: rgba(139, 0, 0, 0.18);
+      --crimson-border: rgba(139, 0, 0, 0.45);
+      --gold: #D4AF37;
+    }
+
     body {
-      background-color: #0C0C0C;
-      color: #F0F0F0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 20px;
+      padding: 40px 24px;
       text-align: center;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(139, 0, 0, 0.12) 0%, transparent 65%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
     }
+
+    /* Ambient Crimson Spotlight */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139, 0, 0, 0.22) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(60px);
+    }
+
+    /* Corner Viewfinder HUD brackets */
+    .hud-corner {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .hud-corner.tl { top: 24px; left: 24px; border-top: 2px solid var(--crimson-bright); border-left: 2px solid var(--crimson-bright); }
+    .hud-corner.tr { top: 24px; right: 24px; border-top: 2px solid var(--crimson-bright); border-right: 2px solid var(--crimson-bright); }
+    .hud-corner.bl { bottom: 24px; left: 24px; border-bottom: 2px solid var(--crimson-bright); border-left: 2px solid var(--crimson-bright); }
+    .hud-corner.br { bottom: 24px; right: 24px; border-bottom: 2px solid var(--crimson-bright); border-right: 2px solid var(--crimson-bright); }
+
+    /* Warning Card */
     .card {
       position: relative;
       z-index: 2;
-      background: #141414;
-      border: 1px solid rgba(240, 240, 240, 0.12);
-      padding: 56px 40px;
-      max-width: 520px;
+      background: var(--card-bg);
+      border: 1px solid var(--crimson-border);
+      padding: clamp(36px, 6vw, 64px) clamp(24px, 5vw, 56px);
+      max-width: 660px;
       width: 100%;
-      border-radius: 4px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+      border-radius: 3px;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, 0.9), 0 0 40px rgba(139, 0, 0, 0.12);
+      backdrop-filter: blur(12px);
     }
-    .tag {
+
+    /* Warning Tag Stamp */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
+      font-weight: 700;
       letter-spacing: 3px;
-      color: #888888;
+      color: #FF4D4D;
+      background: var(--crimson-dim);
+      border: 1px solid rgba(255, 77, 77, 0.35);
+      padding: 8px 18px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      border-radius: 2px;
+    }
+
+    .badge-icon {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #FF4D4D;
+      box-shadow: 0 0 10px #FF4D4D;
+      animation: flashWarning 1.2s infinite ease-in-out;
+    }
+
+    @keyframes flashWarning {
+      0%, 100% { opacity: 1; transform: scale(1.1); }
+      50% { opacity: 0.2; transform: scale(0.8); }
+    }
+
+    /* Main Heading */
+    h1.main-title {
+      font-family: 'Anton', Impact, sans-serif;
+      font-size: clamp(36px, 6vw, 56px);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--crimson);
+      margin-bottom: 18px;
+      line-height: 1.05;
+      position: relative;
+      display: inline-block;
+      text-shadow: 0 0 25px rgba(139, 0, 0, 0.6);
+    }
+
+    /* Glitch subtle scanline effect */
+    .glitch-active {
+      text-shadow: 2px 0 0 #00E5FF, -2px 0 0 #FF0055, 0 0 30px rgba(139, 0, 0, 0.8) !important;
+    }
+
+    /* Subtext */
+    p.subtext {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(15px, 2vw, 17px);
+      font-weight: 300;
+      color: var(--text-color);
+      line-height: 1.65;
+      margin-bottom: 34px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Status Readout Box */
+    .warning-box {
+      background: #0B0B0B;
+      border: 1px solid rgba(255, 77, 77, 0.2);
+      border-left: 3px solid var(--crimson);
+      padding: 22px 24px;
+      margin-bottom: 38px;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #C0C0C0;
+      border-radius: 2px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .warning-header {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: #FF5A5A;
       text-transform: uppercase;
       margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(255, 77, 77, 0.25);
+      padding-bottom: 8px;
     }
-    h1 {
-      font-family: 'Anton', Impact, sans-serif;
-      font-size: clamp(32px, 4.5vw, 42px);
-      letter-spacing: 2px;
+
+    .warning-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      line-height: 1.5;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .warning-row:last-child {
+      border-bottom: none;
+    }
+
+    .warning-label {
+      color: #777777;
+      font-size: 11px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
+    }
+
+    .warning-value {
       color: #F0F0F0;
-      margin-bottom: 16px;
+      font-weight: 600;
+      text-align: right;
     }
-    p {
-      font-size: 15px;
-      font-weight: 300;
-      color: #999999;
-      line-height: 1.7;
-      margin-bottom: 32px;
+
+    .warning-highlight {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(139, 0, 0, 0.12);
+      border: 1px solid rgba(255, 77, 77, 0.25);
+      color: #FFAAAA;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-align: center;
+      text-transform: uppercase;
     }
-    .btn-retry {
+
+    /* Action Button */
+    .btn-action {
       display: inline-block;
       font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: #0C0C0C;
-      background: #D4AF37;
-      padding: 16px 36px;
+      color: #FFFFFF;
+      background: var(--crimson);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 18px 44px;
       border-radius: 2px;
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 4px 25px rgba(139, 0, 0, 0.45);
     }
-    .btn-retry:hover {
-      background: #8B0000;
+
+    .btn-action:hover {
+      background: #A30000;
       color: #FFFFFF;
-      box-shadow: 0 0 20px rgba(139, 0, 0, 0.6);
+      box-shadow: 0 6px 35px rgba(220, 20, 60, 0.55);
+      transform: translateY(-2px);
+    }
+
+    .footer-stamp {
+      margin-top: 26px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #555555;
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
+  <!-- Ambient background glow -->
+  <div class="ambient-glow"></div>
+
+  <!-- Viewfinder corners -->
+  <div class="hud-corner tl"></div>
+  <div class="hud-corner tr"></div>
+  <div class="hud-corner bl"></div>
+  <div class="hud-corner br"></div>
+
+  <!-- Content Card -->
   <div class="card">
-    <div class="tag">GATEWAY STATUS: CANCELLED</div>
-    <h1>TRANSACTION ABORTED</h1>
-    <p>
-      Your payment process was cancelled and no funds were debited. You can return to the Quest anytime to back our independent coverage.
+    <div class="badge">
+      <span class="badge-icon"></span>
+      <span>SIGNAL INTERRUPTED // GATEWAY ABORT</span>
+    </div>
+
+    <h1 class="main-title" id="main-title">TRANSACTION INTERCEPTED</h1>
+
+    <p class="subtext">
+      The secure channel was compromised or the payment was cancelled. No funds were deducted.
     </p>
-    <a href="/#donation-section" class="btn-retry">RETURN TO DONATION</a>
+
+    <!-- Diagnostics / Security readout -->
+    <div class="warning-box" id="warning-box">
+      <div class="warning-header">
+        <span>SECURITY PROTOCOL // TERMINATION LOG</span>
+        <span>CODE: 409_USER_ABORT</span>
+      </div>
+
+      <div class="warning-row">
+        <span class="warning-label">GATEWAY STATUS</span>
+        <span class="warning-value" style="color: #FF4D4D;">ABORTED BY USER / TIMEOUT</span>
+      </div>
+
+      <div class="warning-row">
+        <span class="warning-label">FINANCIAL AUDIT</span>
+        <span class="warning-value" style="color: #4BB543;">0.00 BDT CHARGED</span>
+      </div>
+
+      <div class="warning-row">
+        <span class="warning-label">AUTHENTICATION</span>
+        <span class="warning-value">SESSION DISCONNECTED</span>
+      </div>
+
+      <div class="warning-highlight">
+        DIAGNOSTIC: SECURE HANDSHAKE CANCELLED SAFELY. YOUR ACCOUNT IS UNTOUCHED.
+      </div>
+    </div>
+
+    <!-- Action Link -->
+    <a href="index.html" class="btn-action" id="btn-retry">RETRY CONNECTION</a>
+
+    <div class="footer-stamp">
+      AFSAR'S QUEST // ENCRYPTED PATRONAGE NETWORK
+    </div>
   </div>
+
+  <script>
+    // GSAP Animations and Subtle Glitch Effect
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof gsap !== 'undefined') {
+        const titleEl = document.getElementById('main-title');
+
+        // Initial entrance timeline
+        const enterTl = gsap.timeline();
+
+        enterTl.from(".badge", {
+          opacity: 0,
+          y: -18,
+          duration: 0.6,
+          ease: "power2.out"
+        })
+        .from("#main-title", {
+          opacity: 0,
+          y: 30,
+          scale: 0.94,
+          duration: 0.9,
+          ease: "power3.out"
+        }, "-=0.2")
+        .from(".subtext", {
+          opacity: 0,
+          y: 16,
+          duration: 0.7,
+          ease: "power2.out"
+        }, "-=0.4")
+        .from("#warning-box", {
+          opacity: 0,
+          y: 18,
+          duration: 0.7,
+          ease: "power2.out"
+        }, "-=0.3")
+        .from("#btn-retry", {
+          opacity: 0,
+          y: 18,
+          duration: 0.7,
+          ease: "power2.out"
+        }, "-=0.3");
+
+        // Subtle Glitch / Quick Shake animation on the heading
+        function triggerGlitch() {
+          if (!titleEl) return;
+          const shakeTl = gsap.timeline({
+            onStart: () => titleEl.classList.add('glitch-active'),
+            onComplete: () => {
+              titleEl.classList.remove('glitch-active');
+              gsap.set(titleEl, { x: 0, y: 0 });
+            }
+          });
+
+          shakeTl
+            .to(titleEl, { x: -6, y: 1, duration: 0.04 })
+            .to(titleEl, { x: 6, y: -1, duration: 0.04 })
+            .to(titleEl, { x: -4, y: 0, duration: 0.03 })
+            .to(titleEl, { x: 5, y: 1, duration: 0.03 })
+            .to(titleEl, { x: -2, y: -1, duration: 0.03 })
+            .to(titleEl, { x: 0, y: 0, duration: 0.04 });
+        }
+
+        // Trigger glitch shortly after entrance, then repeat every few seconds
+        setTimeout(() => {
+          triggerGlitch();
+          setInterval(triggerGlitch, 4200);
+        }, 1100);
+      }
+    });
+  </script>
 </body>
 </html>

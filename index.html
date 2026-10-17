@@ -1800,16 +1800,6 @@
         </div>
       </div>
 
-      <!-- Quick Test & Preview Dossier Controls -->
-      <div class="payment-test-links" style="display: flex; gap: 20px; justify-content: center; align-items: center; margin-top: 20px; flex-wrap: wrap;">
-        <a href="success.html?transactionId=AQ-89104&paymentAmount=1000" id="test-success-link" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #D4AF37; text-decoration: none; border-bottom: 1px dashed rgba(212, 175, 55, 0.45); padding-bottom: 2px; text-transform: uppercase; transition: color 0.2s ease;">
-          ⚡ PREVIEW SUCCESS DOSSIER
-        </a>
-        <span style="color: #444444; font-size: 11px;">|</span>
-        <a href="cancel.html" id="test-cancel-link" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #FF5A5A; text-decoration: none; border-bottom: 1px dashed rgba(255, 90, 90, 0.45); padding-bottom: 2px; text-transform: uppercase; transition: color 0.2s ease;">
-          ⚠️ PREVIEW CANCEL INTERCEPTION
-        </a>
-      </div>
 
       <div class="donation-assurance">
         🔒 256-BIT ENCRYPTED CHANNEL • CANCEL ANYTIME • INDEPENDENCE GUARANTEED
@@ -2266,16 +2256,7 @@
     const paymentStatusText = document.getElementById('payment-status-text');
     const manualRedirectWrap = document.getElementById('manual-redirect-wrap');
     const manualRedirectLink = document.getElementById('manual-redirect-link');
-    const testSuccessLink = document.getElementById('test-success-link');
     let selectedAmount = '1000';
-
-    // Helper: update test success URL with selected amount
-    function syncTestLinks(amount) {
-      if (testSuccessLink) {
-        const randTrx = 'AQ-' + Math.floor(100000 + Math.random() * 900000);
-        testSuccessLink.href = `success.html?transactionId=${randTrx}&paymentAmount=${amount}`;
-      }
-    }
 
     // Helper: reset button and feedback to idle state
     function resetPatronBtn() {
@@ -2304,24 +2285,12 @@
           if (customAmountWrap) customAmountWrap.style.display = 'flex';
           if (customAmountInput) {
             customAmountInput.focus();
-            syncTestLinks(customAmountInput.value || 2500);
           }
         } else {
           if (customAmountWrap) customAmountWrap.style.display = 'none';
-          syncTestLinks(selectedAmount);
         }
       });
     });
-
-    if (customAmountInput) {
-      customAmountInput.addEventListener('input', () => {
-        const val = customAmountInput.value.trim();
-        syncTestLinks(val || 1000);
-      });
-    }
-
-    // Initial sync of preview links
-    syncTestLinks(selectedAmount);
 
     // "BECOME A PATRON" Click Handler: Deshi Pay Checkout
     if (patronBtn) {
@@ -2339,8 +2308,6 @@
         } else {
           donationAmount = Number(selectedAmount) || 1000;
         }
-
-        syncTestLinks(donationAmount);
 
         // 2. Change button text to "CONNECTING..." and display live status
         patronBtn.textContent = 'CONNECTING GATEWAY...';

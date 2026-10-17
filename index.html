@@ -1795,9 +1795,6 @@
       <!-- Live Gateway Status Message -->
       <div id="payment-status-box" style="display: none; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px; color: #D4AF37; text-transform: uppercase;">
         <span id="payment-status-text">INITIALIZING ENCRYPTED DISPATCH...</span>
-        <div id="manual-redirect-wrap" style="display: none; margin-top: 8px;">
-          <a id="manual-redirect-link" href="#" target="_blank" style="color: #FFFFFF; background: #8B0000; padding: 6px 14px; border-radius: 2px; text-decoration: none; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; display: inline-block;">CLICK HERE TO OPEN PAYMENT GATEWAY ↗</a>
-        </div>
       </div>
 
 
@@ -2254,26 +2251,19 @@
     const patronBtn = document.getElementById('patron-btn');
     const paymentStatusBox = document.getElementById('payment-status-box');
     const paymentStatusText = document.getElementById('payment-status-text');
-    const manualRedirectWrap = document.getElementById('manual-redirect-wrap');
-    const manualRedirectLink = document.getElementById('manual-redirect-link');
     let selectedAmount = '1000';
 
     // Helper: reset button and feedback to idle state
     function resetPatronBtn() {
       if (patronBtn) {
         patronBtn.textContent = 'BECOME A PATRON';
+        patronBtn.removeAttribute('disabled');
         patronBtn.disabled = false;
         patronBtn.style.opacity = '1';
         patronBtn.style.cursor = 'pointer';
       }
       if (paymentStatusBox) paymentStatusBox.style.display = 'none';
-      if (manualRedirectWrap) manualRedirectWrap.style.display = 'none';
     }
-
-    // BFCache / History Navigation listener: prevents getting frozen in PROCESSING... state
-    window.addEventListener('pageshow', () => {
-      resetPatronBtn();
-    });
 
     // Tier selection & Custom amount toggle
     tierButtons.forEach(btn => {
@@ -2324,55 +2314,39 @@
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        try {
-          // 3. Make POST request using Fetch API
-          // Use same-origin proxy endpoint on production to eliminate browser CORS restrictions
-          let endpoint = '/api/payment/create';
-          if (window.location.protocol === 'file:') {
-            endpoint = 'https://paydeshipay.themedokan.com/api/payment/create';
-          }
+        // 3. Make POST request using Fetch API
+        // Use same-origin proxy endpoint on production to eliminate browser CORS restrictions
+        let endpoint = '/api/payment/create';
+        if (window.location.protocol === 'file:') {
+          endpoint = 'https://paydeshipay.themedokan.com/api/payment/create';
+        }
 
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            signal: controller.signal,
-            headers: {
-              'Content-Type': 'application/json',
-              'API-KEY': DESHIPAY_API_KEY
-            },
-            body: JSON.stringify({
-              cus_name: "Afsar's Quest Patron",
-              cus_email: "patron@example.com",
-              amount: donationAmount,
-              success_url: window.location.origin + "/success.html",
-              cancel_url: window.location.origin + "/cancel.html"
-            })
-          });
-
+        fetch(endpoint, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            'API-KEY': DESHIPAY_API_KEY
+          },
+          body: JSON.stringify({
+            cus_name: "Afsar's Quest Patron",
+            cus_email: "patron@example.com",
+            amount: donationAmount,
+            success_url: window.location.origin + "/success.html",
+            cancel_url: window.location.origin + "/cancel.html"
+          })
+        })
+        .then(res => res.json())
+        .then(response => {
           clearTimeout(timeoutId);
-          const data = await response.json();
-
-          // 4. Response Handling
-          if ((data.status === true || data.status === 1) && data.payment_url) {
-            if (paymentStatusText) {
-              paymentStatusText.textContent = 'GATEWAY SECURED. REDIRECTING TO PAYMENT...';
-            }
-            if (manualRedirectWrap && manualRedirectLink) {
-              manualRedirectWrap.style.display = 'block';
-              manualRedirectLink.href = data.payment_url;
-            }
-
-            // Immediately redirect
-            window.location.href = data.payment_url;
-
-            // Fallback: If browser prevents automatic navigation, allow manual click after 2s
-            setTimeout(() => {
-              patronBtn.textContent = 'REDIRECTING...';
-            }, 2000);
+          if ((response.status === true || response.status === 1) && response.payment_url) {
+            window.location.href = response.payment_url;
           } else {
-            alert(data && data.message ? data.message : 'Payment initiation failed. Please try again.');
+            alert(response && response.message ? response.message : 'Payment initiation failed. Please try again.');
             resetPatronBtn();
           }
-        } catch (err) {
+        })
+        .catch(err => {
           clearTimeout(timeoutId);
           console.error('Payment Error:', err);
 
@@ -2382,7 +2356,7 @@
             alert('Unable to connect to Deshi Pay payment gateway. Please check your connection and try again.');
           }
           resetPatronBtn();
-        }
+        });
       });
     }
 
@@ -2409,7 +2383,32 @@
     }
 
     /* -----------------------------------------------------------
-       10. REFRESH SCROLLTRIGGER AT END OF SCRIPT
+       10. BFCACHE / PAGESHOW RESTORATION
+       ----------------------------------------------------------- */
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        if (patronBtn) {
+          patronBtn.textContent = 'BECOME A PATRON';
+          patronBtn.removeAttribute('disabled');
+          patronBtn.disabled = false;
+          patronBtn.style.opacity = '1';
+          patronBtn.style.cursor = 'pointer';
+        }
+        if (paymentStatusBox) paymentStatusBox.style.display = 'none';
+      } else {
+        if (patronBtn) {
+          patronBtn.textContent = 'BECOME A PATRON';
+          patronBtn.removeAttribute('disabled');
+          patronBtn.disabled = false;
+          patronBtn.style.opacity = '1';
+          patronBtn.style.cursor = 'pointer';
+        }
+        if (paymentStatusBox) paymentStatusBox.style.display = 'none';
+      }
+    });
+
+    /* -----------------------------------------------------------
+       11. REFRESH SCROLLTRIGGER AT END OF SCRIPT
        ----------------------------------------------------------- */
     ScrollTrigger.refresh();
   </script>

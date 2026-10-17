@@ -1207,19 +1207,19 @@
       width: 100%;
       background: #050505;
       border-top: 1px solid rgba(240, 240, 240, 0.06);
-      padding: 80px 50px 40px;
+      padding: 90px 48px 44px;
       color: #F0F0F0;
     }
 
     .footer-top {
-      max-width: 1300px;
+      max-width: 1100px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 60px;
       flex-wrap: wrap;
-      gap: 40px;
+      gap: 50px;
     }
 
     .footer-brand-title {
@@ -1228,7 +1228,8 @@
       letter-spacing: 3px;
       color: #F0F0F0;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      line-height: 1;
     }
 
     .footer-tagline {
@@ -1236,13 +1237,18 @@
       font-size: 13px;
       font-weight: 300;
       color: #777777;
-      max-width: 320px;
+      line-height: 1.65;
+      max-width: 360px;
     }
 
     .footer-links-group {
       display: flex;
-      gap: 48px;
+      gap: clamp(56px, 8vw, 100px);
       flex-wrap: wrap;
+    }
+
+    .footer-links-group > div {
+      min-width: 150px;
     }
 
     .footer-col-title {
@@ -1251,7 +1257,7 @@
       letter-spacing: 3px;
       color: #D4AF37;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .footer-links-list {
@@ -1264,12 +1270,20 @@
       color: #999999;
     }
 
+    .footer-links-list a {
+      color: #999999;
+      text-decoration: none;
+      transition: color 0.2s ease, transform 0.2s ease;
+      display: inline-block;
+    }
+
     .footer-links-list a:hover {
-      color: #8B0000;
+      color: #D4AF37;
+      transform: translateX(2px);
     }
 
     .footer-bottom {
-      max-width: 1300px;
+      max-width: 1100px;
       margin: 0 auto;
       border-top: 1px solid rgba(240, 240, 240, 0.06);
       padding-top: 30px;
@@ -1283,6 +1297,21 @@
       text-transform: uppercase;
       flex-wrap: wrap;
       gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      #site-footer {
+        padding: 70px 24px 36px;
+      }
+      .footer-top {
+        flex-direction: column;
+        gap: 40px;
+      }
+      .footer-links-group {
+        width: 100%;
+        gap: 40px;
+        justify-content: space-between;
+      }
     }
 
     /* Modal for Patron Action */
@@ -1777,16 +1806,6 @@
             <li><a href="#" target="_blank" rel="noopener">Telegram Encrypted Wire</a></li>
             <li><a href="#" target="_blank" rel="noopener">X / Twitter (@AfsarsQuest)</a></li>
             <li><a href="#" target="_blank" rel="noopener">Instagram Documentaries</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <div class="footer-col-title">FIELD DATA</div>
-          <ul class="footer-links-list">
-            <li><span>COORD: 23.8103° N, 90.4125° E</span></li>
-            <li><span>FREQUENCY: 1420.405 MHz</span></li>
-            <li><span>SIGNAL: 100% UNFILTERED</span></li>
-            <li><span>PGP: 7B39 00EA F991 C4B2</span></li>
           </ul>
         </div>
       </div>

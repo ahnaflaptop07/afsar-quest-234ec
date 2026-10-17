@@ -433,139 +433,120 @@
     }
 
     /* -------------------------------------------------------------
-       SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
-       Left 50%: position: sticky; top: 0; height: 100vh; overflow: hidden;
-       Right 50%: Four 100vh text panels. Swap images via IntersectionObserver.
+       SECTION 2: MISSION EXPLAINER (FOUNDER DOSSIER)
+       Apple-like 2-column layout with founder portrait
        ------------------------------------------------------------- */
-    #mission-section {
+    #mission-explainer {
       position: relative;
       width: 100%;
       background-color: #0C0C0C;
-      display: flex;
-      align-items: flex-start;
+      padding: clamp(90px, 12vw, 150px) 32px;
       border-top: 1px solid rgba(240, 240, 240, 0.08);
       border-bottom: 1px solid rgba(240, 240, 240, 0.08);
+      overflow: hidden;
     }
 
-    /* Left 50% Sticky Container */
-    .mission-left {
-      width: 50%;
-      height: 100vh;
-      position: sticky;
-      top: 0;
-      left: 0;
-      overflow: hidden; /* BUG FIX: exact sticky specification */
-      background: #090909;
-      border-right: 1px solid rgba(240, 240, 240, 0.08);
-      flex-shrink: 0;
-    }
-
-    .mission-image-stack {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    .mission-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      transform: scale(1.05);
-      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .mission-img.active {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .mission-img-tint {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, transparent 35%, rgba(12, 12, 12, 0.6) 100%);
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .mission-img-badge {
-      position: absolute;
-      bottom: 36px;
-      left: 36px;
-      z-index: 3;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 3px;
-      color: #D4AF37;
-      background: rgba(12, 12, 12, 0.85);
-      padding: 8px 16px;
-      border-left: 2px solid #D4AF37;
-      text-transform: uppercase;
-      backdrop-filter: blur(6px);
-    }
-
-    /* Right 50% Scrolling Panels */
-    .mission-right {
-      width: 50%;
-      position: relative;
-    }
-
-    .mission-panel {
-      min-height: 100vh;
+    .mission-container {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      padding: 0 10% 0 14%;
-      position: relative;
+      gap: 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-    .mission-panel-index {
+    .mission-image {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .mission-image img {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #222;
+      filter: grayscale(80%);
+      transition: filter 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+      display: block;
+    }
+
+    .mission-image img:hover {
+      filter: grayscale(0%);
+      transform: scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .mission-content {
+      flex: 1.2;
+      text-align: left;
+    }
+
+    .mission-subheading {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       letter-spacing: 3px;
       color: #D4AF37;
-      margin-bottom: 20px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .mission-panel-index::after {
+    .mission-subheading::after {
       content: '';
-      width: 44px;
+      width: 36px;
       height: 1px;
       background: rgba(212, 175, 55, 0.4);
     }
 
-    .mission-panel-title {
+    .mission-heading {
       font-family: 'Anton', Impact, sans-serif;
-      font-size: clamp(42px, 5.5vw, 70px);
+      font-size: clamp(38px, 5.2vw, 64px);
       letter-spacing: 2px;
       text-transform: uppercase;
-      line-height: 1;
-      margin-bottom: 24px;
       color: #F0F0F0;
+      line-height: 1.05;
+      margin-bottom: 22px;
     }
 
-    .mission-panel-quote {
+    .mission-paragraph {
       font-family: 'Inter', sans-serif;
-      font-size: clamp(18px, 1.8vw, 24px);
+      font-size: clamp(15px, 1.4vw, 17px);
       font-weight: 300;
-      line-height: 1.5;
-      color: #D4AF37;
-      max-width: 540px;
-      margin-bottom: 26px;
+      line-height: 1.75;
+      color: #A0A0A0;
+      max-width: 580px;
     }
 
-    .mission-panel-desc {
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      line-height: 1.75;
-      color: #999999;
-      max-width: 500px;
+    @media (max-width: 768px) {
+      .mission-container {
+        flex-direction: column;
+        gap: 40px;
+        text-align: center;
+      }
+      .mission-content {
+        text-align: center;
+      }
+      .mission-subheading {
+        justify-content: center;
+      }
+      .mission-subheading::after {
+        display: none;
+      }
+      .mission-paragraph {
+        margin: 0 auto;
+      }
+      .mission-image img {
+        max-width: 320px;
+        margin: 0 auto;
+      }
     }
+
 
     /* -------------------------------------------------------------
        SECTION 3: HORIZONTAL ACTION RAIL (BUG FIX: HORIZONTAL SCROLL)
@@ -1360,21 +1341,6 @@
         left: 20px;
         right: 20px;
       }
-      #mission-section {
-        flex-direction: column;
-      }
-      .mission-left {
-        width: 100%;
-        height: 50vh;
-        position: relative;
-      }
-      .mission-right {
-        width: 100%;
-      }
-      .mission-panel {
-        min-height: auto;
-        padding: 80px 28px;
-      }
       .rail-card {
         flex-direction: column;
         height: auto;
@@ -1475,65 +1441,21 @@
   </section>
 
   <!-- =============================================================
-       SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
+       SECTION 2: MISSION EXPLAINER (FOUNDER DOSSIER)
        ============================================================= -->
-  <section id="mission-section">
-    <!-- Left 50%: Sticky Image Container (position: sticky; top: 0; height: 100vh; overflow: hidden;) -->
-    <div class="mission-left">
-      <div class="mission-image-stack">
-        <!-- Panel 1 Image -->
-        <img src="images/Folded_vintage_newspaper_on_back._20261016222757.jpg" alt="The Media Narrative" class="mission-img active" data-mission-img="1">
-        <!-- Panel 2 Image -->
-        <img src="images/Vintage_newspaper_transforming_i._20261016223448.jpg" alt="The Geopolitics" class="mission-img" data-mission-img="2">
-        <!-- Panel 3 Image -->
-        <img src="images/Black_cinema_camera_stands_upright_20261016223513.jpg" alt="The Awakening" class="mission-img" data-mission-img="3">
-        <!-- Panel 4 Image -->
-        <img src="images/Filmmaker_recording_with_documen._20261016223553.jpg" alt="The Quest" class="mission-img" data-mission-img="4">
-        
-        <div class="mission-img-tint"></div>
-        <div class="mission-img-badge" id="mission-badge">PHASE 01 // DECONSTRUCTING NARRATIVES</div>
-      </div>
-    </div>
-
-    <!-- Right 50%: Four 100vh scrolling panels -->
-    <div class="mission-right">
-      <!-- Panel 1 -->
-      <div class="mission-panel" data-mission-panel="1">
-        <div class="mission-panel-index">01 / 04</div>
-        <h2 class="mission-panel-title">THE MEDIA NARRATIVE</h2>
-        <p class="mission-panel-quote">“Mainstream media sells a story. We deconstruct the propaganda.”</p>
-        <p class="mission-panel-desc">
-          Behind polished teleprompters and sanitized prime-time soundbites lies an architecture of curated perception. We dissect the manufactured consensus, unearthing the suppressed context and conflicting interests that corporate anchors are paid to ignore.
-        </p>
+  <section id="mission-explainer">
+    <div class="mission-container">
+      <!-- Column 1: Founder Photo -->
+      <div class="mission-image">
+        <img src="founder.jpg" alt="MD Nurul Afsar - Founder">
       </div>
 
-      <!-- Panel 2 -->
-      <div class="mission-panel" data-mission-panel="2">
-        <div class="mission-panel-index">02 / 04</div>
-        <h2 class="mission-panel-title">THE GEOPOLITICS</h2>
-        <p class="mission-panel-quote">“Beyond borders. Understanding the hidden strings of power and politics.”</p>
-        <p class="mission-panel-desc">
-          Wars, sanction regimes, intelligence maneuvers, and backroom economic pacts are rarely what domestic press conferences claim. We map the international chess board to reveal who truly profits, who pays the price, and where power is really being concentrated.
-        </p>
-      </div>
-
-      <!-- Panel 3 -->
-      <div class="mission-panel" data-mission-panel="3">
-        <div class="mission-panel-index">03 / 04</div>
-        <h2 class="mission-panel-title">THE AWAKENING</h2>
-        <p class="mission-panel-quote">“Breaking down complex history and policies so you can see the whole picture.”</p>
-        <p class="mission-panel-desc">
-          History did not start this morning. By connecting decades-old foreign policy precedents, treaty loopholes, and economic records to breaking current events, we deliver investigative clarity that cuts through partisan noise.
-        </p>
-      </div>
-
-      <!-- Panel 4 -->
-      <div class="mission-panel" data-mission-panel="4">
-        <div class="mission-panel-index">04 / 04</div>
-        <h2 class="mission-panel-title">THE QUEST</h2>
-        <p class="mission-panel-quote">“Independent journalism relies on you. Join the movement for truth.”</p>
-        <p class="mission-panel-desc">
-          No oligarchs. No state subsidies. No corporate sponsors dictating red lines. Afsar's Quest belongs exclusively to the global community of thinkers and citizens who demand unvarnished, fearless truth.
+      <!-- Column 2: Mission Content -->
+      <div class="mission-content">
+        <div class="mission-subheading">MISSION DOSSIER</div>
+        <h2 class="mission-heading">UNMASKING GLOBAL POWER</h2>
+        <p class="mission-paragraph">
+          Founded by independent researcher MD Nurul Afsar, Afsar's Quest is a geopolitical analysis and investigative documentary platform dedicated to deconstructing state narratives, uncovering hidden geopolitical interests, and providing uncompromising clarity in an age of manufactured consensus.
         </p>
       </div>
     </div>
@@ -1841,7 +1763,7 @@
           <div class="footer-col-title">SECTIONS</div>
           <ul class="footer-links-list">
             <li><a href="#hero-section">Hero Sequence</a></li>
-            <li><a href="#mission-section">Mission Explainer</a></li>
+            <li><a href="#mission-explainer">Mission Explainer</a></li>
             <li><a href="#action-rail-section">Action Rail</a></li>
             <li><a href="#reverse-columns">Investigative Wire</a></li>
           </ul>
@@ -2115,43 +2037,33 @@
     updateHeroScroll();
 
     /* -----------------------------------------------------------
-       4. SECTION 2: STICKY MISSION EXPLAINER (BUG FIX: STICKY IMAGES)
+       4. SECTION 2: MISSION EXPLAINER (FOUNDER DOSSIER GSAP SCROLLTRIGGER)
        ----------------------------------------------------------- */
-    const missionImages = document.querySelectorAll('.mission-img');
-    const missionPanels = document.querySelectorAll('.mission-panel');
-    const missionBadge = document.getElementById('mission-badge');
-
-    const badgeDescriptions = {
-      '1': 'PHASE 01 // DECONSTRUCTING NARRATIVES',
-      '2': 'PHASE 02 // GEOPOLITICAL ARCHITECTURE',
-      '3': 'PHASE 03 // HISTORICAL CONTEXT',
-      '4': 'PHASE 04 // THE PEOPLE\'S CRUSADE'
-    };
-
-    const missionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const panelNum = entry.target.getAttribute('data-mission-panel');
-          
-          missionImages.forEach(img => {
-            if (img.getAttribute('data-mission-img') === panelNum) {
-              img.classList.add('active');
-            } else {
-              img.classList.remove('active');
-            }
-          });
-
-          if (missionBadge && badgeDescriptions[panelNum]) {
-            missionBadge.textContent = badgeDescriptions[panelNum];
-          }
+    const missionContainer = document.querySelector('.mission-container');
+    if (missionContainer) {
+      const missionTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#mission-explainer',
+          start: 'top 75%',
+          toggleActions: 'play none none none'
         }
       });
-    }, {
-      root: null,
-      threshold: 0.45
-    });
 
-    missionPanels.forEach(panel => missionObserver.observe(panel));
+      missionTl
+        .from('.mission-image', {
+          x: -50,
+          opacity: 0,
+          duration: 1,
+          ease: 'power3.out'
+        })
+        .from(['.mission-subheading', '.mission-heading', '.mission-paragraph'], {
+          y: 35,
+          opacity: 0,
+          duration: 0.85,
+          stagger: 0.18,
+          ease: 'power3.out'
+        }, '-=0.5');
+    }
 
     /* -----------------------------------------------------------
        5. SECTION 3: HORIZONTAL ACTION RAIL (BUG FIX: SCROLL LOGIC)
